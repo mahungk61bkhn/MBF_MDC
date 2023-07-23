@@ -1,0 +1,6 @@
+B1: an chuot phai, chon Git Bash, go "code .", an Enter
+B2: Kiem tra ten nhanh o goc duoi ben trai (chon tren cloud). Neu chua dung ten nhanh, an vao v� chon ten nhanh ddng
+B3: Chon Source Control, se hien ra cac muc de thay doi so voi respository da luu tren gitlab. 
+B4: Viet message ghi chu thay doi, sau do, chon Commit
+B5: Chon Sync Branch
+B6: Kiem tra lai tran gitlab      
