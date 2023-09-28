@@ -47,12 +47,13 @@ uint16_t rx5_count;
 uint16_t rx1_count;
 /********************** Modbus MDC Register Values (MDC as Slave)************************************/
 #define MDC_ID 0x05
-#define MDC_VERSION 1 // LSB: 7bits- last 2 nums of year, 4bits - month, 5bits-day
+#define MDC_VERSION 2 
 uint16_t MDC_regs[106];
 
 /**********************Slave Register (MDC as Master)*************************************/
 #define ID_Accu_Shoto 0x00
 #define ID_Huawei 0x21
+#define ID_Accu_Vision 0x00
 uint16_t BattRegs[130];
 uint16_t BattRegs34[130];
 uint16_t BattRegs5[25];
@@ -210,8 +211,8 @@ void main(void)
 	deviceFlash_readData(charge_discharge_time_addr, data_time, 10);
 	charge_time_count = ((uint32_t)(data_time[0]<<24) +(uint32_t)(data_time[1]<<16)+(uint32_t)(data_time[2]<<8)+(uint32_t)(data_time[3]));
 	discharge_time_count = ((uint32_t)(data_time[4]<<24) +(uint32_t)(data_time[5]<<16)+(uint32_t)(data_time[6]<<8)+(uint32_t)(data_time[7]));
-	if(charge_time_count > 900000||charge_time_count <0) charge_time_count=0;
-	if(discharge_time_count > 900000||discharge_time_count<0) discharge_time_count=0;
+	if(charge_time_count > 900000) charge_time_count=0;
+	if(discharge_time_count > 900000) discharge_time_count=0;
 	MCC_timeout_flag = data_time[9];
 
 	Buzzer(2,50);
@@ -1193,6 +1194,14 @@ void RS485_Master_Mode()
 		RS485_M_Cmd04_and_Receive(ID_Accu_Shoto, 3040,1, BattRegs);
 		MDC_regs[25] = BattRegs[0];
 		break;
+	case 2:
+		// ACCU Vision
+		RS485_M_Read_and_Receive(ID_Accu_Vision, 0x0000, Rs485_RequestToSlave, &MDC_regs[2]);
+		RS485_M_Read_and_Receive(ID_Accu_Vision, 0x0001, Rs485_RequestToSlave, &MDC_regs[7]);
+		RS485_M_Read_and_Receive(ID_Accu_Vision, 0x0019, Rs485_RequestToSlave, &MDC_regs[36]);
+		RS485_M_Read_and_Receive(ID_Accu_Vision, 0x0023, Rs485_RequestToSlave, &MDC_regs[34]);
+		RS485_M_Read_and_Receive(ID_Accu_Vision, 0x0024, Rs485_RequestToSlave, &MDC_regs[33]);
+		RS485_M_Read_and_Receive(ID_Accu_Vision, 0x0025, Rs485_RequestToSlave, &MDC_regs[35]);
 	}
 }
 
