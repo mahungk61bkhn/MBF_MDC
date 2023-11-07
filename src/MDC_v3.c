@@ -9,6 +9,7 @@
 ***********************************************************************/
 #include "r_smc_entry.h"
 #include <stdio.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
@@ -32,9 +33,9 @@ static char print_str[150];
 #define FLASH_CE 	(PORTC.PODR.BIT.B4)
 #define CALIB_EN	(PORTH.PIDR.BIT.B2)
 uint8_t transmit_ctrl=0; // enable transmit to MCC
-volatile bool is_slave =0;
-volatile bool PSU_connect_flag =0;
-extern volatile bool MCC_timeout_flag;
+volatile uint8_t is_slave =0;
+volatile uint8_t PSU_connect_flag =0;
+extern volatile uint8_t MCC_timeout_flag;
 uint8_t Rs485_RequestToSlave[8];// Request send to Slave
 uint8_t Rs485_MasterResponse[220];// Response to MCC
 extern uint8_t rx5_buff[60];
@@ -47,7 +48,7 @@ uint16_t rx5_count;
 uint16_t rx1_count;
 /********************** Modbus MDC Register Values (MDC as Slave)************************************/
 #define MDC_ID 0x05
-#define MDC_VERSION 1 // LSB: 7bits- last 2 nums of year, 4bits - month, 5bits-day
+#define MDC_VERSION 3
 uint16_t MDC_regs[106];
 
 /**********************Slave Register (MDC as Master)*************************************/
@@ -63,7 +64,7 @@ uint16_t BattRegs5[25];
 #define CURR_SENSOR_TH 2 //offset 0A
 #define SAMPLES_NUM  128
 extern uint16_t ADC_sample_count;
-extern volatile bool Sample_done;
+extern volatile uint8_t Sample_done;
 extern uint32_t wait_time;
 uint8_t discharge_start=0; //for counting discharge time
 uint8_t charge_start=0;
@@ -190,7 +191,7 @@ void main(void)
 	R_BSP_SoftwareDelay(200, BSP_DELAY_MILLISECS);//wait sampling finish 1st round.
 	R_Config_SCI5_Start();//UART5 init for RS485 - Slave to communicate with MCC - Remember to add rx5_count = g_sci5_rx_count; in r_Config_SCI5_receive_interrupt()
 	R_Config_SCI1_Start();//UART1 init for RS485_M - Master to communicate with ACCU
-	R_Config_SCI5_Serial_Receive((uint8_t*)&rx5_buff, 100);
+	R_Config_SCI5_Serial_Receive((uint8_t*)&rx5_buff, sizeof(rx5_buff));
 	R_Config_RSPI0_Start();
 	deviceFlash_readData(Offset_addr, data_calib, 16);
 	R_BSP_SoftwareDelay(1, BSP_DELAY_SECS);
@@ -208,10 +209,10 @@ void main(void)
 
 	memset(data_time,0,sizeof(data_time));
 	deviceFlash_readData(charge_discharge_time_addr, data_time, 10);
-	charge_time_count = ((uint32_t)(data_time[0]<<24) +(uint32_t)(data_time[1]<<16)+(uint32_t)(data_time[2]<<8)+(uint32_t)(data_time[3]));
+	charge_time_count = ((uint32_t)(data_time[0]<<24) +(uint32_t)(data_time[1]<<16)+(uint32_t)(data_time[2]<<8)+(uint32_t)(data_time[3])); // @suppress("Symbol is not resolved")
 	discharge_time_count = ((uint32_t)(data_time[4]<<24) +(uint32_t)(data_time[5]<<16)+(uint32_t)(data_time[6]<<8)+(uint32_t)(data_time[7]));
-	if(charge_time_count > 900000||charge_time_count <0) charge_time_count=0;
-	if(discharge_time_count > 900000||discharge_time_count<0) discharge_time_count=0;
+	if(charge_time_count > 900000) charge_time_count=0;
+	if(discharge_time_count > 900000) discharge_time_count=0;
 	MCC_timeout_flag = data_time[9];
 
 	Buzzer(2,50);
@@ -855,7 +856,7 @@ void RS485_Slave_Mode()
 	}
 	g_sci5_rx_count=0;
 	memset(rx5_buff, 0, sizeof(rx5_buff));
-	R_Config_SCI5_Serial_Receive((uint8_t*)&rx5_buff, 100);
+	R_Config_SCI5_Serial_Receive((uint8_t*)&rx5_buff, sizeof(rx5_buff));
 }
 /************************************************************************
  * Function Name: RS485_M_Read_and_Receive

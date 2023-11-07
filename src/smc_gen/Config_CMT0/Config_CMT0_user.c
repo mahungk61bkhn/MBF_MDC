@@ -47,7 +47,7 @@ Global variables and functions
 #define MCU_LED_MCC (PORTB.PODR.BIT.B1)
 #define MCU_LED_PSU (PORTB.PODR.BIT.B0)
 #define MCU_LED_STT (PORTA.PODR.BIT.B6)
-volatile bool Sample_done=0;
+volatile uint8_t Sample_done=0;
 uint16_t ADC_sample_count;
 #define WDI 		(PORT3.PODR.BIT.B2)
 #define SAMPLES_NUM  128
@@ -62,8 +62,8 @@ extern uint16_t ADC_CurrRef2[SAMPLES_NUM];
 extern uint16_t ADC_CurrRef3[SAMPLES_NUM];
 extern uint16_t ADC_CurrRef4[SAMPLES_NUM];
 
-extern volatile bool adc_completed;
-extern volatile bool WD_timeout_flag;
+extern volatile uint8_t adc_completed;
+extern volatile uint8_t WD_timeout_flag;
 void ADC_Sample(uint16_t count);
 /* End user code. Do not edit comment generated here */
 
@@ -115,7 +115,7 @@ static void r_Config_CMT0_cmi0_interrupt(void)
 	}
 	else
 	{
-		WDI =0;
+		WDI =0; //stop WD pulse to reset device
 	}
 
     /* End user code. Do not edit comment generated here */

@@ -43,7 +43,7 @@ Includes
 Global variables and functions
 ***********************************************************************************************************************/
 /* Start user code for global. Do not edit comment generated here */
-volatile bool adc_completed = 0U;
+volatile uint8_t adc_completed = 0U;
 /* End user code. Do not edit comment generated here */
 
 /***********************************************************************************************************************

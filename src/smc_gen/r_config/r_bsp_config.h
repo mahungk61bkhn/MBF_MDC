@@ -144,13 +144,13 @@ Configuration Options
    Character(s) = Description
    30           = RX130 Group
 */
-#define BSP_CFG_MCU_PART_GROUP          "RX130" /* Generated value. Do not edit this manually */
+#define BSP_CFG_MCU_PART_GROUP          0x0 /* Generated value. Do not edit this manually */
 
 /* Series name.
    Character(s) = Description
    51           = RX100 Series
 */
-#define BSP_CFG_MCU_PART_SERIES         "RX100" /* Generated value. Do not edit this manually */
+#define BSP_CFG_MCU_PART_SERIES         0x0 /* Generated value. Do not edit this manually */
 
 /* Memory type.
    Character(s) = Value for macro = Description
@@ -556,7 +556,7 @@ Configuration Options
 /* Version number of Smart Configurator.
    This macro definition is updated by Smart Configurator.
 */
-#define BSP_CFG_CONFIGURATOR_VERSION                (2150) /* Generated value. Do not edit this manually */
+#define BSP_CFG_CONFIGURATOR_VERSION                (2180) /* Generated value. Do not edit this manually */
 
 /* For some BSP functions, it is necessary to ensure that, while these functions are executing, interrupts from other 
    FIT modules do not occur. By controlling the IPL, these functions disable interrupts that are at or below the 

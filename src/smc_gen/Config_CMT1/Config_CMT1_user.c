@@ -50,10 +50,10 @@ uint16_t MCC_timeout_count=0;
 uint16_t WD_timeout_count=0;
 uint32_t wait_time=0;
 uint32_t runtime=0;
-volatile bool MCC_timeout_flag=0;
-volatile bool WD_timeout_flag=0;
-extern volatile bool is_slave;
-extern volatile bool PSU_connect_flag;
+volatile uint8_t MCC_timeout_flag=0;
+volatile uint8_t WD_timeout_flag=0;
+extern volatile uint8_t is_slave;
+extern volatile uint8_t PSU_connect_flag;
 extern uint16_t MDC_regs[104];
 extern uint8_t discharge_start;
 extern uint8_t charge_start;
@@ -110,13 +110,13 @@ static void r_Config_CMT1_cmi1_interrupt(void)
 	if (MCC_timeout_count==899) // 200 *900 ms = 3mins
 	{
 		MCC_timeout_count=0;
-		MCC_timeout_flag =1;
+		MCC_timeout_flag =1; // MCC communication lost
 	}
 
-	if(MCC_timeout_flag)
+	if(MCC_timeout_flag) //BLink LED_MCC indicate lost MCC connection
 	{
 		MCU_LED_MCC ^=1;
-		WD_timeout_count++;
+		WD_timeout_count++; //Count time to stop WD pulse
 	}
 	else
 	{
@@ -127,7 +127,7 @@ static void r_Config_CMT1_cmi1_interrupt(void)
 
 	if (WD_timeout_count==599) // 200 *600 ms = 2mins
 	{
-		WD_timeout_flag=1;
+		WD_timeout_flag=1; // signal to stop WD pulse
 		WD_timeout_count=0;
 	}
 	//LED PSU
