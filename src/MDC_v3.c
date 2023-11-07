@@ -54,6 +54,7 @@ uint16_t MDC_regs[106];
 /**********************Slave Register (MDC as Master)*************************************/
 #define ID_Accu_Shoto 0x00
 #define ID_Huawei 0x21
+#define ID_Accu_Vision 0x00
 uint16_t BattRegs[130];
 uint16_t BattRegs34[130];
 uint16_t BattRegs5[25];
@@ -1194,6 +1195,14 @@ void RS485_Master_Mode()
 		RS485_M_Cmd04_and_Receive(ID_Accu_Shoto, 3040,1, BattRegs);
 		MDC_regs[25] = BattRegs[0];
 		break;
+	case 2:
+		// ACCU Vision
+		RS485_M_Read_and_Receive(ID_Accu_Vision, 0x0000, Rs485_RequestToSlave, &MDC_regs[2]);
+		RS485_M_Read_and_Receive(ID_Accu_Vision, 0x0001, Rs485_RequestToSlave, &MDC_regs[7]);
+		RS485_M_Read_and_Receive(ID_Accu_Vision, 0x0019, Rs485_RequestToSlave, &MDC_regs[36]);
+		RS485_M_Read_and_Receive(ID_Accu_Vision, 0x0023, Rs485_RequestToSlave, &MDC_regs[34]);
+		RS485_M_Read_and_Receive(ID_Accu_Vision, 0x0024, Rs485_RequestToSlave, &MDC_regs[33]);
+		RS485_M_Read_and_Receive(ID_Accu_Vision, 0x0025, Rs485_RequestToSlave, &MDC_regs[35]);
 	}
 }
 
