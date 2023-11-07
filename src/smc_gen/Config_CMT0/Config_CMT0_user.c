@@ -125,42 +125,66 @@ static void r_Config_CMT0_cmi0_interrupt(void)
 void ADC_Sample(uint16_t count)
 {
 	R_Config_S12AD0_Start();
-	while((!adc_completed) && (!R_BSP_SoftwareDelay(15, BSP_DELAY_MICROSECS)));
+	uint8_t cnt = 50;
+	while(S12AD.ADCSR.BIT.ADST && cnt--) {
+		R_BSP_SoftwareDelay(1, BSP_DELAY_MICROSECS);
+	}
 	R_Config_S12AD0_Get_ValueResult(ADCHANNEL1,&ADC_Temp1[count]);
 	R_Config_S12AD0_Stop();
 
 	R_Config_S12AD0_Start();
-	while((!adc_completed) && (!R_BSP_SoftwareDelay(15, BSP_DELAY_MICROSECS)));
+	cnt = 50;
+	while(S12AD.ADCSR.BIT.ADST && cnt--) {
+		R_BSP_SoftwareDelay(1, BSP_DELAY_MICROSECS);
+	}
 	R_Config_S12AD0_Get_ValueResult(ADCHANNEL0,&ADC_Temp2[count]);
 	R_Config_S12AD0_Stop();
 
 //	R_Config_S12AD0_Start();
-//	while((!adc_completed) && (!R_BSP_SoftwareDelay(15, BSP_DELAY_MICROSECS)));
+//	cnt = 50;
+//	while(S12AD.ADCSR.BIT.ADST && cnt--) {
+//		R_BSP_SoftwareDelay(1, BSP_DELAY_MICROSECS);
+//	}
 //	R_Config_S12AD0_Get_ValueResult(ADCHANNEL2,&ADC_CurrRef1[count]);
 //	R_Config_S12AD0_Stop();
 
 	R_Config_S12AD0_Start();
-	while((!adc_completed) && (!R_BSP_SoftwareDelay(15, BSP_DELAY_MICROSECS)));
+	cnt = 50;
+	while(S12AD.ADCSR.BIT.ADST && cnt--) {
+		R_BSP_SoftwareDelay(1, BSP_DELAY_MICROSECS);
+	}
 	R_Config_S12AD0_Get_ValueResult(ADCHANNEL3,&ADC_Curr1[count]);
 	R_Config_S12AD0_Stop();
 
 //	R_Config_S12AD0_Start();
-//	while((!adc_completed) && (!R_BSP_SoftwareDelay(15, BSP_DELAY_MICROSECS)));
+//		cnt = 50;
+//	while(S12AD.ADCSR.BIT.ADST && cnt--) {
+//		R_BSP_SoftwareDelay(1, BSP_DELAY_MICROSECS);
+//	}
 //	R_Config_S12AD0_Get_ValueResult(ADCHANNEL4,&ADC_CurrRef2[count]);
 //	R_Config_S12AD0_Stop();
 
 	R_Config_S12AD0_Start();
-	while((!adc_completed) && (!R_BSP_SoftwareDelay(15, BSP_DELAY_MICROSECS)));
+	cnt = 50;
+	while(S12AD.ADCSR.BIT.ADST && cnt--) {
+		R_BSP_SoftwareDelay(1, BSP_DELAY_MICROSECS);
+	}
 	R_Config_S12AD0_Get_ValueResult(ADCHANNEL5,&ADC_Curr2[count]);
 	R_Config_S12AD0_Stop();
 
 //	R_Config_S12AD0_Start();
-//	while((!adc_completed) && (!R_BSP_SoftwareDelay(15, BSP_DELAY_MICROSECS)));
+//	cnt = 50;
+//	while(S12AD.ADCSR.BIT.ADST && cnt--) {
+//		R_BSP_SoftwareDelay(1, BSP_DELAY_MICROSECS);
+//	}
 //	R_Config_S12AD0_Get_ValueResult(ADCHANNEL6,&ADC_CurrRef3[count]);
 //	R_Config_S12AD0_Stop();
 
 	R_Config_S12AD0_Start();
-	while((!adc_completed) && (!R_BSP_SoftwareDelay(15, BSP_DELAY_MICROSECS)));
+	cnt = 50;
+	while(S12AD.ADCSR.BIT.ADST && cnt--) {
+		R_BSP_SoftwareDelay(1, BSP_DELAY_MICROSECS);
+	}
 	R_Config_S12AD0_Get_ValueResult(ADCHANNEL7,&ADC_Curr3[count]);
 	R_Config_S12AD0_Stop();
 
@@ -170,27 +194,42 @@ void ADC_Sample(uint16_t count)
 //	R_Config_S12AD0_Stop();
 
 	R_Config_S12AD0_Start();
-	while((!adc_completed) && (!R_BSP_SoftwareDelay(15, BSP_DELAY_MICROSECS)));
+	cnt = 50;
+	while(S12AD.ADCSR.BIT.ADST && cnt--) {
+		R_BSP_SoftwareDelay(1, BSP_DELAY_MICROSECS);
+	}
 	R_Config_S12AD0_Get_ValueResult(ADCHANNEL17,&ADC_Curr4[count]);
 	R_Config_S12AD0_Stop();
 
 	R_Config_S12AD0_Start();
-	while((!adc_completed) && (!R_BSP_SoftwareDelay(15, BSP_DELAY_MICROSECS)));
+	cnt = 50;
+	while(S12AD.ADCSR.BIT.ADST && cnt--) {
+		R_BSP_SoftwareDelay(1, BSP_DELAY_MICROSECS);
+	}
 	R_Config_S12AD0_Get_ValueResult(ADCHANNEL18,&ADC_Volt1[count]);
 	R_Config_S12AD0_Stop();
 
 	R_Config_S12AD0_Start();
-	while((!adc_completed) && (!R_BSP_SoftwareDelay(15, BSP_DELAY_MICROSECS)));
+	cnt = 50;
+	while(S12AD.ADCSR.BIT.ADST && cnt--) {
+		R_BSP_SoftwareDelay(1, BSP_DELAY_MICROSECS);
+	}
 	R_Config_S12AD0_Get_ValueResult(ADCHANNEL19,&ADC_Volt2[count]);
 	R_Config_S12AD0_Stop();
 
 	R_Config_S12AD0_Start();
-	while((!adc_completed) && (!R_BSP_SoftwareDelay(15, BSP_DELAY_MICROSECS)));
+	cnt = 50;
+	while(S12AD.ADCSR.BIT.ADST && cnt--) {
+		R_BSP_SoftwareDelay(1, BSP_DELAY_MICROSECS);
+	}
 	R_Config_S12AD0_Get_ValueResult(ADCHANNEL20,&ADC_Volt3[count]);
 	R_Config_S12AD0_Stop();
 
 	R_Config_S12AD0_Start();
-	while((!adc_completed) && (!R_BSP_SoftwareDelay(15, BSP_DELAY_MICROSECS)));
+	cnt = 50;
+	while(S12AD.ADCSR.BIT.ADST && cnt--) {
+		R_BSP_SoftwareDelay(1, BSP_DELAY_MICROSECS);
+	}
 	R_Config_S12AD0_Get_ValueResult(ADCHANNEL21,&ADC_Volt4[count]);
 	R_Config_S12AD0_Stop();
 
