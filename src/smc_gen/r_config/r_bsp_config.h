@@ -144,13 +144,13 @@ Configuration Options
    Character(s) = Description
    30           = RX130 Group
 */
-#define BSP_CFG_MCU_PART_GROUP          0x0 /* Generated value. Do not edit this manually */
+#define BSP_CFG_MCU_PART_GROUP          "RX130" /* Generated value. Do not edit this manually */
 
 /* Series name.
    Character(s) = Description
    51           = RX100 Series
 */
-#define BSP_CFG_MCU_PART_SERIES         0x0 /* Generated value. Do not edit this manually */
+#define BSP_CFG_MCU_PART_SERIES         "RX100" /* Generated value. Do not edit this manually */
 
 /* Memory type.
    Character(s) = Value for macro = Description

@@ -48,7 +48,7 @@ uint16_t rx5_count;
 uint16_t rx1_count;
 /********************** Modbus MDC Register Values (MDC as Slave)************************************/
 #define MDC_ID 0x05
-#define MDC_VERSION 3
+#define MDC_VERSION 4
 uint16_t MDC_regs[106];
 
 /**********************Slave Register (MDC as Master)*************************************/
