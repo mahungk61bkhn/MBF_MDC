@@ -38,18 +38,19 @@ volatile uint8_t PSU_connect_flag =0;
 extern volatile uint8_t MCC_timeout_flag;
 uint8_t Rs485_RequestToSlave[8];// Request send to Slave
 uint8_t Rs485_MasterResponse[220];// Response to MCC
-extern uint8_t rx5_buff[60];
-extern uint8_t rx1_buff[300];
+uint8_t rx5_buff[500];
+uint8_t rx1_buff[500];
 uint16_t SPI_buff[270];
 //extern uint8_t SCI5_rxdone;
 extern uint8_t SCI1_rxdone;
 extern uint16_t  g_sci5_rx_count;
 uint16_t rx5_count;
 uint16_t rx1_count;
+extern uint32_t tick;
 /********************** Modbus MDC Register Values (MDC as Slave)************************************/
 #define MDC_ID 0x05
-#define MDC_VERSION 4
-uint16_t MDC_regs[106];
+#define MDC_VERSION 6
+uint16_t MDC_regs[500];
 
 /**********************Slave Register (MDC as Master)*************************************/
 #define ID_Accu_Shoto 0x00
@@ -158,8 +159,10 @@ void main(void)
 	MDC_regs[101] =0; // Bootloader Control Register
 	MDC_regs[102] = MDC_VERSION; // Bootloader Version Register
 	MDC_regs[103] =0; // Huawei ACCU
+	tick=0;
 	charge_time_count=0;
 	discharge_time_count=0;
+
 	MCU_LED_STT=0;
 	MCU_LED_PSU=0;
 	MCU_LED_MCC=0;
@@ -882,13 +885,13 @@ void RS485_M_Read_and_Receive(uint8_t slaveID, uint16_t Register, uint8_t *reque
 	CRC16 = CRC16_bytewise(request, 6);
 	*(request+6) = CRC16 & 0xff;
 	*(request+7) = CRC16 >> 8;
+	R_Config_SCI1_Serial_Receive((uint8_t*)&rx1_buff, 7);
 	RS485_M_Ctr = 1U; //RS485 send mode
 	R_SCI1_AsyncTransmit(request,8);
 	RS485_M_Ctr = 0U; //RS485 receive mode
-
-	R_Config_SCI1_Serial_Receive((uint8_t*)&rx1_buff, 7);
-	R_BSP_SoftwareDelay(50, BSP_DELAY_MILLISECS);
-	if (SCI1_rxdone ==1)
+	uint32_t lasttick = tick;
+	while((!SCI1_rxdone) && (tick-lasttick < 100));
+	if(SCI1_rxdone==1)
 	{
 		//print test
 //		uint8_t i=0;
@@ -948,6 +951,7 @@ void RS485_M_Read_Batt(uint8_t slaveID, uint16_t Start_Add, uint16_t NbRgt ,uint
 	R_SCI1_AsyncTransmit(request,8);
 	RS485_M_Ctr = 0U; //RS485 receive mode
 
+	uint32_t lasttick = tick;
 	//print test
 //	sprintf(print_str,"\n\r SEND: ");
 //	RS485_S_Ctr = 1U; //RS485 send mode
@@ -964,8 +968,8 @@ void RS485_M_Read_Batt(uint8_t slaveID, uint16_t Start_Add, uint16_t NbRgt ,uint
 //	}
 	//end_print_test
 
-	R_BSP_SoftwareDelay(500, BSP_DELAY_MILLISECS);
-	if (SCI1_rxdone ==1)
+	while((!SCI1_rxdone) && (tick-lasttick< NbRgt*10));
+	if(SCI1_rxdone==1)
 	{
 		//print test
 //		sprintf(print_str,"\n\r RECEIVE: ");
@@ -1107,13 +1111,13 @@ void RS485_M_Cmd04_and_Receive(uint8_t slaveID, uint32_t StartAdd, uint16_t NoR,
 	CRC16 = CRC16_bytewise(request, 6);
 	*(request+6) = CRC16 & 0xff;
 	*(request+7) = CRC16 >> 8;
-
+	R_Config_SCI1_Serial_Receive((uint8_t*)&rx1_buff, (NoR*2+5));
 	RS485_M_Ctr = 1U; //RS485 send mode
 	R_SCI1_AsyncTransmit(request,8);
 	RS485_M_Ctr = 0U; //RS485 receive mode
+	uint32_t lasttick = tick;
 
-	R_Config_SCI1_Serial_Receive((uint8_t*)&rx1_buff, (NoR*2+5));
-	while((!SCI1_rxdone) && (!R_BSP_SoftwareDelay(100, BSP_DELAY_MILLISECS)));
+	while((!SCI1_rxdone) && (tick-lasttick<NoR*10));
 	if (SCI1_rxdone ==1)
 	{
 		//print test
@@ -1182,6 +1186,8 @@ void RS485_Master_Mode()
 		//Battery 3 4 Parameters
 		RS485_M_Read_Batt(ID_Huawei, 0xA7B1, 125 ,Rs485_RequestToSlave, BattRegs); //Battery 3 4 Regs 0xA7B1
 		RS485_M_Read_Batt(ID_Huawei, 0x1000, 22 ,Rs485_RequestToSlave, BattRegs5);
+
+
 		break;
 	case 1:
 		// ACCU SHOTO

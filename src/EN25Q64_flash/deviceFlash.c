@@ -74,31 +74,6 @@ void deviceFlash_readMfrID(uint16_t *Mfr, uint16_t *ID)
 bool deviceFlash_readData(uint32_t add, uint8_t *rx_DATA, uint32_t len)
 {
 
-//	uint16_t *p = malloc((sizeof(uint16_t))*(len + 4));
-//    uint16_t *arr = malloc((sizeof(uint16_t))*(len + 4));
-//    if ((p==NULL) || (arr==NULL))
-//    {
-//    	return false;
-//    }
-//    arr[0] = 0x03;
-//    arr[1] = (add&0x00FF0000)>>16;
-//    arr[2] = (add&0x0000FF00)>>8;
-//    arr[3] = add&0x000000FF;
-//
-//
-//    FLASH_SEL_ACTIVE;
-//    SPI_Send_Receive(arr, (uint16_t)(4 + len), p);
-//    FLASH_SEL_INACTIVE;
-//    for (uint32_t i = 0; i < len; i++)
-//    {
-//    	rx_DATA[i] = (uint8_t)p[4 + i];
-//    }
-//    free(p); free(arr);
-//    return true;
-
-
-
-
     uint8_t *rx = rx_DATA;
     uint16_t *p = malloc((sizeof(uint16_t))*60);
     uint16_t *arr = malloc((sizeof(uint16_t))*60);

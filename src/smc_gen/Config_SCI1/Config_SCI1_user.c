@@ -48,7 +48,7 @@ extern volatile uint8_t * gp_sci1_rx_address;                /* SCI1 receive buf
 extern volatile uint16_t  g_sci1_rx_count;                   /* SCI1 receive data number */
 extern volatile uint16_t  g_sci1_rx_length;                  /* SCI1 receive data length */
 /* Start user code for global. Do not edit comment generated here */
-uint8_t rx1_buff[300];
+//uint8_t rx1_buff[500];
 /* Flag used to detect whether data is received */
 volatile uint8_t SCI1_rxdone;
 /* Flag used to detect completion of transmission */

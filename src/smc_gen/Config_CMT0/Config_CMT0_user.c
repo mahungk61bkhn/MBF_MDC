@@ -49,6 +49,7 @@ Global variables and functions
 #define MCU_LED_STT (PORTA.PODR.BIT.B6)
 volatile uint8_t Sample_done=0;
 uint16_t ADC_sample_count;
+uint32_t tick;
 #define WDI 		(PORT3.PODR.BIT.B2)
 #define SAMPLES_NUM  128
 extern uint16_t ADC_Temp1[SAMPLES_NUM], ADC_Temp2[SAMPLES_NUM];
@@ -95,6 +96,9 @@ void R_Config_CMT0_Create_UserInit(void)
 static void r_Config_CMT0_cmi0_interrupt(void)
 {
     /* Start user code for r_Config_CMT0_cmi0_interrupt. Do not edit comment generated here */
+	//system tick
+	tick++;
+
 	// Sampling
 	if ((ADC_sample_count<SAMPLES_NUM) && (Sample_done==0))
 	{
@@ -107,17 +111,9 @@ static void r_Config_CMT0_cmi0_interrupt(void)
 		Sample_done =1; // notice to perform Calculating
 	}
 	// Watch Dog
-	if(!WD_timeout_flag)
-	{
-		WDI =1;
-		R_BSP_SoftwareDelay(5, BSP_DELAY_MICROSECS);
-		WDI =0;
-	}
-	else
-	{
-		WDI =0; //stop WD pulse to reset device
-	}
-
+	WDI =1;
+	R_BSP_SoftwareDelay(5, BSP_DELAY_MICROSECS);
+	WDI =0;
     /* End user code. Do not edit comment generated here */
 }
 

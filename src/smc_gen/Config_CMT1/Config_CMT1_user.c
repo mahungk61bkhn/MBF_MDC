@@ -46,6 +46,7 @@ Global variables and functions
 #define MCU_LED_MCC (PORTB.PODR.BIT.B1)
 #define MCU_LED_PSU (PORTB.PODR.BIT.B0)
 #define MCU_LED_STT (PORTA.PODR.BIT.B6)
+#define MCC_DISCONNECT_TIMEOUT 45 //minutes
 uint16_t MCC_timeout_count=0;
 uint16_t WD_timeout_count=0;
 uint32_t wait_time=0;
@@ -125,10 +126,11 @@ static void r_Config_CMT1_cmi1_interrupt(void)
 		WD_timeout_flag=0;
 	}
 
-	if (WD_timeout_count==599) // 200 *600 ms = 2mins
+	if (WD_timeout_count==599*21) // (200 *600 ms = 2mins)*21 = 42 mins
 	{
 		WD_timeout_flag=1; // signal to stop WD pulse
 		WD_timeout_count=0;
+		PowerON_Reset_PC();
 	}
 	//LED PSU
 	if(!PSU_connect_flag) MCU_LED_PSU ^=1;
