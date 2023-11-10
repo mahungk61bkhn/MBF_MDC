@@ -27,6 +27,11 @@ static char print_str[150];
 #define MCU_LED_MCC (PORTB.PODR.BIT.B1)
 #define BUZZER 		(PORT3.PODR.BIT.B1)
 #define WDI 		(PORT3.PODR.BIT.B2)
+/********************** Modbus MDC Register Values (MDC as Slave)************************************/
+#define MDC_ID 0x05
+#define MDC_VERSION 7
+#define MDC_NUM_REGS 320
+uint16_t MDC_regs[MDC_NUM_REGS];
 /********************** Modbus MDC ************************************/
 #define RS485_M_Ctr (PORT2.PODR.BIT.B7)
 #define RS485_S_Ctr (PORTC.PODR.BIT.B1)
@@ -37,7 +42,7 @@ volatile uint8_t is_slave =0;
 volatile uint8_t PSU_connect_flag =0;
 extern volatile uint8_t MCC_timeout_flag;
 uint8_t Rs485_RequestToSlave[8];// Request send to Slave
-uint8_t Rs485_MasterResponse[220];// Response to MCC
+uint8_t Rs485_MasterResponse[(MDC_NUM_REGS*2+10)];// Response to MCC
 uint8_t rx5_buff[500];
 uint8_t rx1_buff[500];
 uint16_t SPI_buff[270];
@@ -47,20 +52,20 @@ extern uint16_t  g_sci5_rx_count;
 uint16_t rx5_count;
 uint16_t rx1_count;
 extern uint32_t tick;
-/********************** Modbus MDC Register Values (MDC as Slave)************************************/
-#define MDC_ID 0x05
-#define MDC_VERSION 6
-uint16_t MDC_regs[500];
+
 
 /**********************Slave Register (MDC as Master)*************************************/
 #define ID_Accu_Shoto 0x00
-#define ID_Huawei 0x21
+#define ID_Box_Huawei 0x21
 #define ID_Accu_Vision 0x00
+#define ID_Accu_Huawei 214
+#define ID_Accu_Narada 1
+#define ID_ZZT4850 1
 uint16_t BattRegs[130];
 uint16_t BattRegs34[130];
 uint16_t BattRegs5[25];
 
-/**********************MDC Measurement*************************************/
+/**********************MDC Measurement****************************************************/
 #define OFFSET_TEMP1 0
 #define OFFSET_TEMP2 0
 #define CURR_SENSOR_TH 2 //offset 0A
@@ -734,7 +739,6 @@ void RS485_Slave_Mode()
 				// wrong CRC
 			}
 		}
-
 		// READ MULTIPLE REGISTER 0x03 Command full function
 		// 8 Bytes
 		else if((rx5_buff[i+0]== MDC_ID)&&(rx5_buff[i+1]== 0x03)) //Slave address & Read command
@@ -1176,20 +1180,32 @@ void RS485_Master_Mode()
 {
 	switch(MDC_regs[103])
 	{
-	case 0:
-		//Huaweii ACCU
-		RS485_M_Read_and_Receive(ID_Huawei, 0x1103, Rs485_RequestToSlave, &MDC_regs[19]);
-		RS485_M_Read_and_Receive(ID_Huawei, 0x1101, Rs485_RequestToSlave, &MDC_regs[17]);
-		RS485_M_Read_and_Receive(ID_Huawei, 0x1100, Rs485_RequestToSlave, &MDC_regs[18]);
-		//Battery 1 2 Parameters
-		RS485_M_Read_Batt(ID_Huawei, 0xA731, 125 ,Rs485_RequestToSlave, BattRegs); //Battery 1 2 Regs 0xA731
-		//Battery 3 4 Parameters
-		RS485_M_Read_Batt(ID_Huawei, 0xA7B1, 125 ,Rs485_RequestToSlave, BattRegs); //Battery 3 4 Regs 0xA7B1
-		RS485_M_Read_Batt(ID_Huawei, 0x1000, 22 ,Rs485_RequestToSlave, BattRegs5);
-
-
-		break;
 	case 1:
+		//Tu nguon Huawei
+		RS485_M_Read_and_Receive(ID_Box_Huawei, 0x1103, Rs485_RequestToSlave, &MDC_regs[19]);
+		RS485_M_Read_and_Receive(ID_Box_Huawei, 0x1101, Rs485_RequestToSlave, &MDC_regs[17]);
+		RS485_M_Read_and_Receive(ID_Box_Huawei, 0x1100, Rs485_RequestToSlave, &MDC_regs[18]);
+		//Battery 1 2 Parameters
+		RS485_M_Read_Batt(ID_Box_Huawei, 0xA731, 125 ,Rs485_RequestToSlave, BattRegs); //Battery 1 2 Regs 0xA731
+		//Battery 3 4 Parameters
+		RS485_M_Read_Batt(ID_Box_Huawei, 0xA7B1, 125 ,Rs485_RequestToSlave, BattRegs); //Battery 3 4 Regs 0xA7B1
+		RS485_M_Read_Batt(ID_Box_Huawei, 0x1000, 22 ,Rs485_RequestToSlave, BattRegs5);
+
+		RS485_M_Read_Batt(ID_Box_Huawei,  0xA731, 181 ,Rs485_RequestToSlave, MDC_regs +130);
+		break;
+	case 2:
+		// ACCU Vision
+		RS485_M_Read_and_Receive(ID_Accu_Vision, 0x0000, Rs485_RequestToSlave, &MDC_regs[2]);
+		RS485_M_Read_and_Receive(ID_Accu_Vision, 0x0001, Rs485_RequestToSlave, &MDC_regs[7]);
+		RS485_M_Read_and_Receive(ID_Accu_Vision, 0x0019, Rs485_RequestToSlave, &MDC_regs[36]);
+		RS485_M_Read_and_Receive(ID_Accu_Vision, 0x0023, Rs485_RequestToSlave, &MDC_regs[34]);
+		RS485_M_Read_and_Receive(ID_Accu_Vision, 0x0024, Rs485_RequestToSlave, &MDC_regs[33]);
+		RS485_M_Read_and_Receive(ID_Accu_Vision, 0x0025, Rs485_RequestToSlave, &MDC_regs[35]);
+
+		RS485_M_Read_Batt(ID_Accu_Vision,  0x00, 181 ,Rs485_RequestToSlave, MDC_regs +130);
+		break;
+
+	case 3:
 		// ACCU SHOTO
 		RS485_M_Cmd04_and_Receive(ID_Accu_Shoto, 1000,10, BattRegs);
 		MDC_regs[0] = BattRegs[0];
@@ -1201,14 +1217,50 @@ void RS485_Master_Mode()
 		RS485_M_Cmd04_and_Receive(ID_Accu_Shoto, 3040,1, BattRegs);
 		MDC_regs[25] = BattRegs[0];
 		break;
-	case 2:
-		// ACCU Vision
-		RS485_M_Read_and_Receive(ID_Accu_Vision, 0x0000, Rs485_RequestToSlave, &MDC_regs[2]);
-		RS485_M_Read_and_Receive(ID_Accu_Vision, 0x0001, Rs485_RequestToSlave, &MDC_regs[7]);
-		RS485_M_Read_and_Receive(ID_Accu_Vision, 0x0019, Rs485_RequestToSlave, &MDC_regs[36]);
-		RS485_M_Read_and_Receive(ID_Accu_Vision, 0x0023, Rs485_RequestToSlave, &MDC_regs[34]);
-		RS485_M_Read_and_Receive(ID_Accu_Vision, 0x0024, Rs485_RequestToSlave, &MDC_regs[33]);
-		RS485_M_Read_and_Receive(ID_Accu_Vision, 0x0025, Rs485_RequestToSlave, &MDC_regs[35]);
+	case 4:
+		// accu vision 100A
+		RS485_M_Read_Batt(ID_Accu_Vision,  0x00, 181 ,Rs485_RequestToSlave, MDC_regs +130);
+		break;
+
+	case 5:
+		//ACCU Huawei
+		RS485_M_Read_and_Receive(ID_Accu_Huawei, 0x0000, Rs485_RequestToSlave, &MDC_regs[0]);
+		RS485_M_Read_and_Receive(ID_Accu_Huawei, 0x0002, Rs485_RequestToSlave, &MDC_regs[5]);
+		RS485_M_Read_and_Receive(ID_Accu_Huawei, 0x0204, Rs485_RequestToSlave, &MDC_regs[12]);
+		RS485_M_Read_and_Receive(ID_Accu_Huawei, 0x0043, Rs485_RequestToSlave, &MDC_regs[22]);
+		RS485_M_Read_and_Receive(ID_Accu_Huawei, 0x0003, Rs485_RequestToSlave, &MDC_regs[23]);
+		RS485_M_Read_and_Receive(ID_Accu_Huawei, 0x004A, Rs485_RequestToSlave, &MDC_regs[25]);
+		RS485_M_Read_and_Receive(ID_Accu_Huawei, 0x0005, Rs485_RequestToSlave, &MDC_regs[26]);
+		RS485_M_Read_and_Receive(ID_Accu_Huawei, 0x0107, Rs485_RequestToSlave, &MDC_regs[50]);
+		break;
+	case 6:
+		//Narada        48NPFC100
+		RS485_M_Read_and_Receive(ID_Accu_Narada, 0x0FFF, Rs485_RequestToSlave, &MDC_regs[0]);
+		RS485_M_Read_and_Receive(ID_Accu_Narada, 0x1000, Rs485_RequestToSlave, &MDC_regs[5]);
+		RS485_M_Read_and_Receive(ID_Accu_Narada, 0x1007, Rs485_RequestToSlave, &MDC_regs[23]);
+		RS485_M_Read_and_Receive(ID_Accu_Narada, 0x1009, Rs485_RequestToSlave, &MDC_regs[24]);
+		RS485_M_Read_and_Receive(ID_Accu_Narada, 0x1002, Rs485_RequestToSlave, &MDC_regs[26]);
+		RS485_M_Read_Batt(ID_Accu_Narada,  0xFFF, 181 ,Rs485_RequestToSlave, MDC_regs +130);
+		break;
+
+	case 7:
+		//accu ztt4850
+		RS485_M_Read_and_Receive(ID_ZZT4850, 0, Rs485_RequestToSlave, &MDC_regs[0]);
+		RS485_M_Read_and_Receive(ID_ZZT4850, 1, Rs485_RequestToSlave, &MDC_regs[5]);
+		break;
+
+	case 8:
+		//accu vision 100A_VN
+		RS485_M_Read_Batt(ID_Accu_Vision,  0x00, 181 ,Rs485_RequestToSlave, MDC_regs +130);
+		break;
+
+	case 9:
+		//accu postef
+		break;
+
+	case 10:
+		//tủ nguồn POSTEF CSU501B (SNMP)
+		break;
 	}
 }
 
