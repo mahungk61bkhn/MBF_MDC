@@ -29,7 +29,7 @@ static char print_str[150];
 #define WDI 		(PORT3.PODR.BIT.B2)
 /********************** Modbus MDC Register Values (MDC as Slave)************************************/
 #define MDC_ID 0x05
-#define MDC_VERSION 7
+#define MDC_VERSION 8
 #define MDC_NUM_REGS 320
 uint16_t MDC_regs[MDC_NUM_REGS];
 /********************** Modbus MDC ************************************/
@@ -43,7 +43,7 @@ volatile uint8_t PSU_connect_flag =0;
 extern volatile uint8_t MCC_timeout_flag;
 uint8_t Rs485_RequestToSlave[8];// Request send to Slave
 uint8_t Rs485_MasterResponse[(MDC_NUM_REGS*2+10)];// Response to MCC
-uint8_t rx5_buff[500];
+uint8_t rx5_buff[300];
 uint8_t rx1_buff[500];
 uint16_t SPI_buff[270];
 //extern uint8_t SCI5_rxdone;
@@ -103,7 +103,7 @@ int16_t OFFSET_I2=0;
 int16_t OFFSET_I3=0;
 int16_t OFFSET_I4=0;
 uint8_t data_calib[16];
-uint8_t data_time[10];
+uint8_t data_time[12];
 
 
 
@@ -202,8 +202,10 @@ void main(void)
 	R_Config_SCI1_Start();//UART1 init for RS485_M - Master to communicate with ACCU
 	R_Config_SCI5_Serial_Receive((uint8_t*)&rx5_buff, sizeof(rx5_buff));
 	R_Config_RSPI0_Start();
-	deviceFlash_readData(Offset_addr, data_calib, 16);
-	R_BSP_SoftwareDelay(1, BSP_DELAY_SECS);
+	for(int i=1;i<3;i++)
+	{
+		deviceFlash_readData(Offset_addr, data_calib, 16);
+	}
 
 	deviceFlash_readData(Offset_addr, data_calib, 16);
 	OFFSET_V1 = (uint16_t)(data_calib[0]<<8) +(uint16_t)data_calib[1];
@@ -222,7 +224,7 @@ void main(void)
 	discharge_time_count = ((uint32_t)(data_time[4]<<24) +(uint32_t)(data_time[5]<<16)+(uint32_t)(data_time[6]<<8)+(uint32_t)(data_time[7]));
 	if(charge_time_count > 900000) charge_time_count=0;
 	if(discharge_time_count > 900000) discharge_time_count=0;
-	MCC_timeout_flag = data_time[9];
+	MCC_timeout_flag = data_time[11];
 
 	Buzzer(2,50);
 
@@ -258,7 +260,7 @@ void main(void)
     ret_fw_up = fw_up_open_flash();
 	while(1)
 	{
-		R_BSP_SoftwareDelay(500, BSP_DELAY_MILLISECS);
+		R_BSP_SoftwareDelay(200, BSP_DELAY_MILLISECS);
 		if(g_sci5_rx_count>7)
 		{
 			RS485_Slave_Mode();
@@ -329,20 +331,26 @@ void main(void)
 
 			MDC_regs[21] = (uint16_t)(charge_time_count/300); // 200ms*(5*60) = 1min
 			MDC_regs[22] = (uint16_t)(discharge_time_count/300); // 200ms*(5*60) = 1min
+			uint32_t lasttick = tick;
 
 			// Save time to flash
-			chargtimeH = (uint16_t)(charge_time_count>>16);
-			chargtimeL = (uint16_t)(charge_time_count& 0xFFFF);
-			dischargtimeH = (uint16_t)(discharge_time_count>>16);
-			dischargtimeL = (uint16_t)(discharge_time_count& 0xFFFF);
-			Flash_Sector_Erase(charge_discharge_time_addr);
-			Flash_write(charge_discharge_time_addr,chargtimeH, chargtimeL, dischargtimeH,dischargtimeL,MCC_timeout_flag,0,0,0);
+//			chargtimeH = (uint16_t)(charge_time_count>>16);
+//			chargtimeL = (uint16_t)(charge_time_count& 0xFFFF);
+//			dischargtimeH = (uint16_t)(discharge_time_count>>16);
+//			dischargtimeL = (uint16_t)(discharge_time_count& 0xFFFF);
+//			Flash_Sector_Erase(charge_discharge_time_addr);
+//			Flash_write(charge_discharge_time_addr,chargtimeH, chargtimeL, dischargtimeH,dischargtimeL,MCC_timeout_flag,0,0,0);
 
-//			sprintf(print_str,"\n\risSlave= %d MCC_timeout_flag= %d\r\n",is_slave,MCC_timeout_flag);
-//			RS485_S_Ctr = 1U; //RS485 Master send mode
-//			R_SCI5_AsyncTransmit((uint8_t*)print_str,strlen(print_str),transmit_ctrl);
-//			RS485_S_Ctr = 0U; //RS485 Master receive mode
-//			memset(print_str, 0, sizeof(print_str));
+			if(tick-lasttick>1000*60)
+			{
+				lasttick = tick;
+				uint32_t savedata[3];
+				savedata[0] = charge_time_count;
+				savedata[1] = discharge_time_count;
+				savedata[2] = MCC_timeout_flag;
+				deviceFlash_erase4k(charge_discharge_time_addr);
+				deviceFlash_writeData(charge_discharge_time_addr, savedata, sizeof(savedata));
+			}
 		}
 	}
 }
@@ -1266,13 +1274,14 @@ void RS485_Master_Mode()
 
 void measure()
 {
+	uint32_t lasttick = tick;
+	while(!Sample_done && (tick-lasttick<200));
 	if (Sample_done)
 	{
 		MDC_regs[0] = (uint16_t)(volt_measure(ADC_Volt1,1) );
 		MDC_regs[1] = (uint16_t)(volt_measure(ADC_Volt2,2) );
 		MDC_regs[2] = (uint16_t)(volt_measure(ADC_Volt3,3) );
 		MDC_regs[3] = (uint16_t)(volt_measure(ADC_Volt4,4) );
-
 
 		MDC_regs[5] = (uint16_t)abs((current_measure(ADC_Curr1,ADC_CurrRef1,1)));
 		if(MDC_regs[5]<100) MDC_regs[5]=0;

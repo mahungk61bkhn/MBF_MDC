@@ -47,6 +47,7 @@ Global variables and functions
 #define MCU_LED_PSU (PORTB.PODR.BIT.B0)
 #define MCU_LED_STT (PORTA.PODR.BIT.B6)
 #define MCC_DISCONNECT_TIMEOUT 45 //minutes
+#define MDC_NUM_REGS 320
 uint16_t MCC_timeout_count=0;
 uint16_t WD_timeout_count=0;
 uint32_t wait_time=0;
@@ -55,7 +56,7 @@ volatile uint8_t MCC_timeout_flag=0;
 volatile uint8_t WD_timeout_flag=0;
 extern volatile uint8_t is_slave;
 extern volatile uint8_t PSU_connect_flag;
-extern uint16_t MDC_regs[104];
+extern uint16_t MDC_regs[MDC_NUM_REGS];
 extern uint8_t discharge_start;
 extern uint8_t charge_start;
 uint32_t discharge_time_count;

@@ -49,6 +49,7 @@ extern volatile uint16_t g_rspi0_rx_count;                 /* RSPI0 receive data
 extern volatile uint16_t g_rspi0_rx_length;                /* RSPI0 receive data length */
 /* Start user code for global. Do not edit comment generated here */
 volatile uint8_t r_spi0_txdone;
+extern uint32_t tick;
 /* End user code. Do not edit comment generated here */
 
 /***********************************************************************************************************************
@@ -246,6 +247,7 @@ void SPI_Send_Receive(uint16_t * const tx_buf, uint16_t tx_num, uint16_t * const
 {
 	 r_spi0_txdone = 0U;
 	 R_Config_RSPI0_Send_Receive(tx_buf, tx_num,  rx_buf);
-	 while(0U == r_spi0_txdone){};
+	 uint32_t lasttick = tick;
+	 while(0U == r_spi0_txdone && tick-lasttick<tx_num*50 ){};
 }
 /* End user code. Do not edit comment generated here */

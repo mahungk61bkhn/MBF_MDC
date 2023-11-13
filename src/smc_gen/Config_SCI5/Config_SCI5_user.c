@@ -48,7 +48,7 @@ extern volatile uint8_t * gp_sci5_rx_address;                /* SCI5 receive buf
 extern volatile uint16_t  g_sci5_rx_count;                   /* SCI5 receive data number */
 extern volatile uint16_t  g_sci5_rx_length;                  /* SCI5 receive data length */
 /* Start user code for global. Do not edit comment generated here */
-extern uint8_t rx5_buff[500];
+extern uint8_t rx5_buff[300];
 //extern uint16_t rx5_count; // Remember to add rx5_count = g_sci5_rx_count; in r_Config_SCI5_receive_interrupt()
 /* Flag used to detect whether data is received */
 volatile uint8_t SCI5_rxdone;

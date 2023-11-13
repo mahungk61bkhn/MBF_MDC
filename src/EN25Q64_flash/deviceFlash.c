@@ -29,6 +29,9 @@
 #define  FLASH_SEL_INACTIVE    	(PORTC.PODR.BIT.B4 = 1)
 #define  FLASH_SEL_ACTIVE 		(PORTC.PODR.BIT.B4 = 0)
 
+extern uint32_t tick;
+
+
 static uint8_t WaitForWriteEnd(void)
 {
   uint8_t FLASH_Status = 0;
@@ -42,7 +45,7 @@ static uint8_t WaitForWriteEnd(void)
 //  Spi_SendReceive(RDSR);
   arr[0] = RDSR;
   SPI_Send_Receive(arr, 1, ret);
-
+  uint32_t lasttick = tick;
   /* Loop as long as the busy flag is set                                                                   */
   do
   {
@@ -54,7 +57,7 @@ static uint8_t WaitForWriteEnd(void)
 	  FLASH_Status = (uint8_t)ret[0];
 
 
-  } while((FLASH_Status & BUSY_FLAG) == 1);
+  } while((FLASH_Status & BUSY_FLAG) == 1 && tick-lasttick<500);
 
   /* Deselect the SPI FLASH                                                                                 */
   FLASH_SEL_INACTIVE;
@@ -132,31 +135,6 @@ static void deviceFlash_writeDisable(void)
 }
 void deviceFlash_writePage(uint32_t add, uint8_t *tx_DATA, uint32_t len)
 {
-//	uint16_t* arr =  malloc((sizeof(uint16_t))*(len + 4));
-//    uint16_t *ret = malloc((sizeof(uint16_t))*(len + 4));
-//    uint16_t *value = malloc((sizeof(uint16_t))*len);
-//    arr[0] = writePage;
-//    arr[1] = (add&0x00FF0000)>>16;
-//    arr[2] = (add&0x0000FF00)>>8;
-//    arr[3] = add&0x000000FF;
-//    for (uint32_t i = 0; i < len; i++)
-//    {
-//    	value[i] = tx_DATA[i];
-//    }
-//
-//    deviceFlash_writeEnable();
-//
-//    FLASH_SEL_ACTIVE;
-//    SPI_Send_Receive(arr, 4, ret);
-//    SPI_Send_Receive(value, len, ret);
-//
-//    FLASH_SEL_INACTIVE;
-//    WaitForWriteEnd();
-//
-//    deviceFlash_writeDisable();
-//    free(arr); free(ret); free(value);
-
-
 	uint8_t *tx = tx_DATA;
     uint16_t* arr =  malloc((sizeof(uint16_t))*60);
     uint16_t *ret = malloc((sizeof(uint16_t))*60);
