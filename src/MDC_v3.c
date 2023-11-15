@@ -28,6 +28,11 @@ static char print_str[150];
 #define MCU_LED_MCC (PORTB.PODR.BIT.B1)
 #define BUZZER 		(PORT3.PODR.BIT.B1)
 #define WDI 		(PORT3.PODR.BIT.B2)
+/********************** Modbus MDC Register Values (MDC as Slave)************************************/
+#define MDC_ID 0x05
+#define MDC_VERSION 8
+#define MDC_NUM_REGS 320
+uint16_t MDC_regs[MDC_NUM_REGS];
 /********************** Modbus MDC ************************************/
 #define RS485_M_Ctr (PORT2.PODR.BIT.B7)
 #define RS485_S_Ctr (PORTC.PODR.BIT.B1)
@@ -66,7 +71,7 @@ uint16_t BattRegs[130];
 uint16_t BattRegs34[130];
 uint16_t BattRegs5[25];
 
-/**********************MDC Measurement*************************************/
+/**********************MDC Measurement****************************************************/
 #define OFFSET_TEMP1 0
 #define OFFSET_TEMP2 0
 #define CURR_SENSOR_TH 2 //offset 0A
@@ -332,6 +337,7 @@ void main(void)
 
 			MDC_regs[21] = (uint16_t)(charge_time_count/300); // 200ms*(5*60) = 1min
 			MDC_regs[22] = (uint16_t)(discharge_time_count/300); // 200ms*(5*60) = 1min
+			uint32_t lasttick = tick;
 
 			uint32_t lasttick = tick;
 

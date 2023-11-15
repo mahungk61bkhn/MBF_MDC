@@ -53,7 +53,6 @@ extern volatile uint16_t  g_sci1_rx_length;                  /* SCI1 receive dat
 volatile uint8_t SCI1_rxdone;
 /* Flag used to detect completion of transmission */
 static volatile uint8_t SCI1_txdone;
-extern uint16_t rx1_count;
 MD_STATUS R_SCI1_AsyncTransmit (uint8_t * const tx_buf,uint16_t tx_num);
 /* End user code. Do not edit comment generated here */
 
