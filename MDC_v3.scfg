@@ -321,36 +321,36 @@
     </tool>
     <tool id="Pins" version="1.0.1.0">
         <pinItem allocation="7" comments="" direction="None" id="XTAL" isUsedBySoftware="true" locked="false" operationMode="" status="0"/>
-        <pinItem allocation="32" comments="" direction="None" id="RXD5" isUsedBySoftware="true" locked="false" operationMode="" status="0"/>
-        <pinItem allocation="15" comments="" direction="O" id="P27" isUsedBySoftware="true" locked="false" operationMode="" status="0"/>
-        <pinItem allocation="14" comments="" direction="None" id="RXD1" isUsedBySoftware="true" locked="false" operationMode="" status="0"/>
         <pinItem allocation="27" comments="" direction="None" id="MISOA" isUsedBySoftware="true" locked="false" operationMode="" status="0"/>
         <pinItem allocation="9" comments="" direction="None" id="EXTAL" isUsedBySoftware="true" locked="false" operationMode="" status="0"/>
+        <pinItem allocation="3" comments="" direction="None" id="FINED" isUsedBySoftware="true" locked="false" operationMode="" status="0"/>
+        <pinItem allocation="41" comments="" direction="O" id="PA6" isUsedBySoftware="true" locked="false" operationMode="" status="0"/>
+        <pinItem allocation="37" comments="" direction="O" id="PB1" isUsedBySoftware="true" locked="false" operationMode="" status="0"/>
+        <pinItem allocation="39" comments="" direction="O" id="PB0" isUsedBySoftware="true" locked="false" operationMode="" status="0"/>
+        <pinItem allocation="15" comments="" direction="O" id="P27" isUsedBySoftware="true" locked="false" operationMode="" status="0"/>
         <pinItem allocation="47" comments="" direction="None" id="AN020" isUsedBySoftware="true" locked="false" operationMode="" status="0"/>
         <pinItem allocation="46" comments="" direction="None" id="AN021" isUsedBySoftware="true" locked="false" operationMode="" status="0"/>
         <pinItem allocation="33" comments="" direction="O" id="PC1" isUsedBySoftware="true" locked="false" operationMode="" status="0"/>
         <pinItem allocation="30" comments="" direction="O" id="PC4" isUsedBySoftware="true" locked="false" operationMode="" status="0"/>
-        <pinItem allocation="28" comments="" direction="None" id="MOSIA" isUsedBySoftware="true" locked="false" operationMode="" status="0"/>
         <pinItem allocation="12" comments="" direction="O" id="P32" isUsedBySoftware="true" locked="false" operationMode="" status="0"/>
         <pinItem allocation="13" comments="" direction="O" id="P31" isUsedBySoftware="true" locked="false" operationMode="" status="0"/>
         <pinItem allocation="50" comments="" direction="None" id="AN017" isUsedBySoftware="true" locked="false" operationMode="" status="0"/>
         <pinItem allocation="49" comments="" direction="None" id="AN018" isUsedBySoftware="true" locked="false" operationMode="" status="0"/>
         <pinItem allocation="48" comments="" direction="None" id="AN019" isUsedBySoftware="true" locked="false" operationMode="" status="0"/>
-        <pinItem allocation="3" comments="" direction="None" id="FINED" isUsedBySoftware="true" locked="false" operationMode="" status="0"/>
+        <pinItem allocation="29" comments="" direction="None" id="RSPCKA" isUsedBySoftware="true" locked="false" operationMode="" status="0"/>
+        <pinItem allocation="32" comments="" direction="None" id="RXD5" isUsedBySoftware="true" locked="false" operationMode="" status="0"/>
+        <pinItem allocation="14" comments="" direction="None" id="RXD1" isUsedBySoftware="true" locked="false" operationMode="" status="0"/>
         <pinItem allocation="22" comments="" direction="I" id="PH2" isUsedBySoftware="true" locked="false" operationMode="" status="0"/>
         <pinItem allocation="54" comments="" direction="None" id="AN005" isUsedBySoftware="true" locked="false" operationMode="" status="0"/>
         <pinItem allocation="52" comments="" direction="None" id="AN007" isUsedBySoftware="true" locked="false" operationMode="" status="0"/>
-        <pinItem allocation="31" comments="" direction="None" id="TXD5" isUsedBySoftware="true" locked="false" operationMode="" status="0"/>
-        <pinItem allocation="16" comments="" direction="None" id="TXD1" isUsedBySoftware="true" locked="false" operationMode="" status="0"/>
         <pinItem allocation="60" comments="" direction="None" id="AN000" isUsedBySoftware="true" locked="false" operationMode="" status="0"/>
         <pinItem allocation="58" comments="" direction="None" id="AN001" isUsedBySoftware="true" locked="false" operationMode="" status="0"/>
         <pinItem allocation="56" comments="" direction="None" id="AN003" isUsedBySoftware="true" locked="false" operationMode="" status="0"/>
         <pinItem allocation="61" comments="" direction="None" id="VREFH0" isUsedBySoftware="true" locked="false" operationMode="" status="0"/>
-        <pinItem allocation="41" comments="" direction="O" id="PA6" isUsedBySoftware="true" locked="false" operationMode="" status="0"/>
+        <pinItem allocation="28" comments="" direction="None" id="MOSIA" isUsedBySoftware="true" locked="false" operationMode="" status="0"/>
+        <pinItem allocation="31" comments="" direction="None" id="TXD5" isUsedBySoftware="true" locked="false" operationMode="" status="0"/>
+        <pinItem allocation="16" comments="" direction="None" id="TXD1" isUsedBySoftware="true" locked="false" operationMode="" status="0"/>
         <pinItem allocation="59" comments="" direction="None" id="VREFL0" isUsedBySoftware="true" locked="false" operationMode="" status="0"/>
-        <pinItem allocation="29" comments="" direction="None" id="RSPCKA" isUsedBySoftware="true" locked="false" operationMode="" status="0"/>
-        <pinItem allocation="37" comments="" direction="O" id="PB1" isUsedBySoftware="true" locked="false" operationMode="" status="0"/>
-        <pinItem allocation="39" comments="" direction="O" id="PB0" isUsedBySoftware="true" locked="false" operationMode="" status="0"/>
     </tool>
     <tool id="Summary" version="1.0.0.0">
         <option id="com.renesas.smc.code.path" value="src\smc_gen"/>
@@ -954,7 +954,7 @@
                     <item id="Use" input="" vlaue="0"/>
                     <item id="ANunuse" input="" vlaue="0"/>
                 </option>
-                <option enabled="true" id="StartTrigger" selection="Software">
+                <option enabled="true" id="StartTrigger" selection="TRGA0N">
                     <item id="Software" input="" vlaue="0"/>
                     <item id="ADTRG" input="" vlaue="0"/>
                     <item id="TRGA0N" input="" vlaue="0"/>
@@ -1693,7 +1693,7 @@
                             <item id="PullupUnuse" input="" vlaue="0"/>
                             <item id="Pullupdisable" input="" vlaue="0"/>
                         </option>
-                        <option enabled="true" id="Opendrain" selection="CMOS">
+                        <option enabled="true" id="Opendrain" selection="Opendraindisable">
                             <item id="CMOS" input="" vlaue="0"/>
                             <item id="NChanel" input="" vlaue="0"/>
                             <item id="PChanel" input="" vlaue="0"/>
@@ -2119,7 +2119,7 @@
                             <item id="PullupUnuse" input="" vlaue="0"/>
                             <item id="Pullupdisable" input="" vlaue="0"/>
                         </option>
-                        <option enabled="true" id="Opendrain" selection="CMOS">
+                        <option enabled="true" id="Opendrain" selection="Opendraindisable">
                             <item id="CMOS" input="" vlaue="0"/>
                             <item id="NChanel" input="" vlaue="0"/>
                             <item id="PChanel" input="" vlaue="0"/>
@@ -2149,7 +2149,7 @@
                             <item id="PullupUnuse" input="" vlaue="0"/>
                             <item id="Pullupdisable" input="" vlaue="0"/>
                         </option>
-                        <option enabled="true" id="Opendrain" selection="CMOS">
+                        <option enabled="true" id="Opendrain" selection="Opendraindisable">
                             <item id="CMOS" input="" vlaue="0"/>
                             <item id="NChanel" input="" vlaue="0"/>
                             <item id="PChanel" input="" vlaue="0"/>
@@ -2179,7 +2179,7 @@
                             <item id="PullupUnuse" input="" vlaue="0"/>
                             <item id="Pullupdisable" input="" vlaue="0"/>
                         </option>
-                        <option enabled="true" id="Opendrain" selection="CMOS">
+                        <option enabled="true" id="Opendrain" selection="Opendraindisable">
                             <item id="CMOS" input="" vlaue="0"/>
                             <item id="NChanel" input="" vlaue="0"/>
                             <item id="PChanel" input="" vlaue="0"/>
@@ -2539,7 +2539,7 @@
                             <item id="PullupUnuse" input="" vlaue="0"/>
                             <item id="Pullupdisable" input="" vlaue="0"/>
                         </option>
-                        <option enabled="true" id="Opendrain" selection="CMOS">
+                        <option enabled="true" id="Opendrain" selection="Opendraindisable">
                             <item id="CMOS" input="" vlaue="0"/>
                             <item id="NChanel" input="" vlaue="0"/>
                             <item id="PChanel" input="" vlaue="0"/>
@@ -2569,7 +2569,7 @@
                             <item id="PullupUnuse" input="" vlaue="0"/>
                             <item id="Pullupdisable" input="" vlaue="0"/>
                         </option>
-                        <option enabled="true" id="Opendrain" selection="CMOS">
+                        <option enabled="true" id="Opendrain" selection="Opendraindisable">
                             <item id="CMOS" input="" vlaue="0"/>
                             <item id="NChanel" input="" vlaue="0"/>
                             <item id="PChanel" input="" vlaue="0"/>
@@ -2599,7 +2599,7 @@
                             <item id="PullupUnuse" input="" vlaue="0"/>
                             <item id="Pullupdisable" input="" vlaue="0"/>
                         </option>
-                        <option enabled="true" id="Opendrain" selection="CMOS">
+                        <option enabled="true" id="Opendrain" selection="Opendraindisable">
                             <item id="CMOS" input="" vlaue="0"/>
                             <item id="NChanel" input="" vlaue="0"/>
                             <item id="PChanel" input="" vlaue="0"/>
@@ -2629,7 +2629,7 @@
                             <item id="PullupUnuse" input="" vlaue="0"/>
                             <item id="Pullupdisable" input="" vlaue="0"/>
                         </option>
-                        <option enabled="true" id="Opendrain" selection="CMOS">
+                        <option enabled="true" id="Opendrain" selection="Opendraindisable">
                             <item id="CMOS" input="" vlaue="0"/>
                             <item id="NChanel" input="" vlaue="0"/>
                             <item id="PChanel" input="" vlaue="0"/>
@@ -2706,6 +2706,9 @@
                 <gridItem id="FLASH_CFG_CODE_FLASH_BGO" selectedIndex="0"/>
                 <gridItem id="FLASH_CFG_CODE_FLASH_RUN_FROM_ROM" selectedIndex="0"/>
             </component>
+            <source description="Components supporting Firmware Integration Technology" display="Firmware Integration Technology" id="com.renesas.smc.tools.swcomponent.fit.source"/>
+            <source description="Components supporting Firmware Integration Technology" display="Firmware Integration Technology" id="com.renesas.smc.tools.swcomponent.fit.source"/>
+            <source description="Components supporting Firmware Integration Technology" display="Firmware Integration Technology" id="com.renesas.smc.tools.swcomponent.fit.source"/>
             <source description="Components supporting Firmware Integration Technology" display="Firmware Integration Technology" id="com.renesas.smc.tools.swcomponent.fit.source"/>
             <source description="Components supporting Firmware Integration Technology" display="Firmware Integration Technology" id="com.renesas.smc.tools.swcomponent.fit.source"/>
         </configuration>

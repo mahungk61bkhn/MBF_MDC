@@ -111,9 +111,10 @@ static void r_Config_CMT0_cmi0_interrupt(void)
 		Sample_done =1; // notice to perform Calculating
 	}
 	// Watch Dog
-	WDI =1;
+	WDI = 1;
 	R_BSP_SoftwareDelay(5, BSP_DELAY_MICROSECS);
-	WDI =0;
+	WDI = 0;
+
     /* End user code. Do not edit comment generated here */
 }
 
