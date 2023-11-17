@@ -28,11 +28,6 @@ static char print_str[150];
 #define MCU_LED_MCC (PORTB.PODR.BIT.B1)
 #define BUZZER 		(PORT3.PODR.BIT.B1)
 #define WDI 		(PORT3.PODR.BIT.B2)
-/********************** Modbus MDC Register Values (MDC as Slave)************************************/
-#define MDC_ID 0x05
-#define MDC_VERSION 8
-#define MDC_NUM_REGS 320
-uint16_t MDC_regs[MDC_NUM_REGS];
 /********************** Modbus MDC ************************************/
 #define RS485_M_Ctr (PORT2.PODR.BIT.B7)
 #define RS485_S_Ctr (PORTC.PODR.BIT.B1)
@@ -40,10 +35,9 @@ uint16_t MDC_regs[MDC_NUM_REGS];
 #define CALIB_EN	(PORTH.PIDR.BIT.B2)
 /********************** Modbus MDC Register Values (MDC as Slave)************************************/
 #define MDC_ID 0x05
-#define MDC_VERSION 9
+#define MDC_VERSION 8
 #define MDC_NUM_REGS 320
 uint16_t MDC_regs[MDC_NUM_REGS];
-
 uint8_t transmit_ctrl = 0; // enable transmit to MCC
 volatile uint8_t is_slave = 0;
 volatile uint8_t PSU_connect_flag = 0;
@@ -337,8 +331,6 @@ void main(void)
 
 			MDC_regs[21] = (uint16_t)(charge_time_count/300); // 200ms*(5*60) = 1min
 			MDC_regs[22] = (uint16_t)(discharge_time_count/300); // 200ms*(5*60) = 1min
-			uint32_t lasttick = tick;
-
 			uint32_t lasttick = tick;
 
 			// Save time to flash
@@ -1206,8 +1198,6 @@ void RS485_M_Cmd04_and_Receive(uint8_t slaveID, uint32_t StartAdd, uint16_t NoR,
 	RS485_M_Ctr = 0U; //RS485 receive mode
 	uint32_t lasttick = tick;
 
-	uint32_t lasttick = tick;
-
 	while((!SCI1_rxdone) && (tick-lasttick<NoR*10));
 	if (SCI1_rxdone ==1)
 	{
@@ -1340,7 +1330,9 @@ void RS485_Master_Mode()
 			// accu postef
 			break;
 		case 10:
+			//tủ nguồn POSTEF CSU501B (SNMP)
 			handler_snmp();
+			break;
 	}
 }
 
