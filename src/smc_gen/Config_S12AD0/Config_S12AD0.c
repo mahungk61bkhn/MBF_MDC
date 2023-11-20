@@ -63,7 +63,7 @@ void R_Config_S12AD0_Create(void)
 
     /* Set S12AD0 control registers */
     S12AD.ADDISCR.BYTE = _00_AD_DISCONECT_UNUSED;
-    S12AD.ADCSR.WORD = _0000_AD_DBLTRIGGER_DISABLE | _0000_AD_SYNC_TRIGGER | _0200_AD_SYNCASYNCTRG_ENABLE | 
+    S12AD.ADCSR.WORD = _0000_AD_DBLTRIGGER_DISABLE | _0000_AD_SYNCASYNCTRG_DISABLE | 
                        _1000_AD_SCAN_END_INTERRUPT_ENABLE | _0000_AD_SINGLE_SCAN_MODE;
     S12AD.ADHVREFCNT.BYTE |= (_01_AD_HIGH_POTENTIAL_VREFH0 | _10_AD_LOW_POTENTIAL_VREFL0);
     S12AD.ADBUFEN.BYTE |= _00_AD_STORAGE_BUFF_UNUSED;
@@ -84,9 +84,6 @@ void R_Config_S12AD0_Create(void)
 
     /* Set compare control register */
     S12AD.ADCMPCR.WORD = _0000_AD_WINDOWB_DISABLE | _0000_AD_WINDOWA_DISABLE | _0000_AD_WINDOWFUNCTION_DISABLE;
-
-    /* Set AD conversion start trigger sources */
-    S12AD.ADSTRGR.WORD = _0100_AD_TRSA_TRG0AN;
 
     /* Set ELC scan end event generation condition */
     S12AD.ADELCCR.BYTE = _02_ALL_SCAN_COMPLETION;
@@ -168,7 +165,7 @@ void R_Config_S12AD0_Start(void)
 {
     IR(S12AD, S12ADI0) = 0U;
     IEN(S12AD, S12ADI0) = 1U;
-    S12AD.ADCSR.BIT.TRGE = 1U;
+    S12AD.ADCSR.BIT.ADST = 1U;
 }
 
 /***********************************************************************************************************************
@@ -180,7 +177,6 @@ void R_Config_S12AD0_Start(void)
 
 void R_Config_S12AD0_Stop(void)
 {
-    S12AD.ADCSR.BIT.TRGE = 0U;
     S12AD.ADCSR.BIT.ADST = 0U;
     IEN(S12AD, S12ADI0) = 0U;
     IR(S12AD, S12ADI0) = 0U;

@@ -227,7 +227,7 @@ void main(void)
 		discharge_time_count = 0;
 	MCC_timeout_flag = data_time[11];
 
-	Buzzer(2,50);
+//	Buzzer(2,50);
 
 	//print test
 	sprintf(print_str, "\n\rV_OffSet= %d %d %d %d\r\n", OFFSET_V1, OFFSET_V2, OFFSET_V3, OFFSET_V4);
@@ -1477,6 +1477,7 @@ float volt_measure(uint16_t *ADC_value, uint8_t channel) {
 		}
 		volt = volt * 100 + OFFSET_V1;
 	}
+
 	else if (channel == 2)
 	{
 		if (volt < 35)
@@ -1485,6 +1486,7 @@ float volt_measure(uint16_t *ADC_value, uint8_t channel) {
 		}
 		volt = volt * 100 + OFFSET_V2;
 	}
+
 	else if (channel == 3)
 	{
 		if (volt < 35)
@@ -1493,6 +1495,7 @@ float volt_measure(uint16_t *ADC_value, uint8_t channel) {
 		}
 		volt = volt * 100 + OFFSET_V3;
 	}
+
 	else if (channel == 4)
 	{
 		if (volt < 35)
@@ -1503,7 +1506,9 @@ float volt_measure(uint16_t *ADC_value, uint8_t channel) {
 	}
 
 	if (volt < 2000)
+	{
 		volt = 0;
+	}
 
 	//print test
 //		RS485_S_Ctr = 1U; //RS485 Master send mode

@@ -954,7 +954,7 @@
                     <item id="Use" input="" vlaue="0"/>
                     <item id="ANunuse" input="" vlaue="0"/>
                 </option>
-                <option enabled="true" id="StartTrigger" selection="TRGA0N">
+                <option enabled="true" id="StartTrigger" selection="Software">
                     <item id="Software" input="" vlaue="0"/>
                     <item id="ADTRG" input="" vlaue="0"/>
                     <item id="TRGA0N" input="" vlaue="0"/>
@@ -2706,6 +2706,7 @@
                 <gridItem id="FLASH_CFG_CODE_FLASH_BGO" selectedIndex="0"/>
                 <gridItem id="FLASH_CFG_CODE_FLASH_RUN_FROM_ROM" selectedIndex="0"/>
             </component>
+            <source description="Components supporting Firmware Integration Technology" display="Firmware Integration Technology" id="com.renesas.smc.tools.swcomponent.fit.source"/>
             <source description="Components supporting Firmware Integration Technology" display="Firmware Integration Technology" id="com.renesas.smc.tools.swcomponent.fit.source"/>
             <source description="Components supporting Firmware Integration Technology" display="Firmware Integration Technology" id="com.renesas.smc.tools.swcomponent.fit.source"/>
             <source description="Components supporting Firmware Integration Technology" display="Firmware Integration Technology" id="com.renesas.smc.tools.swcomponent.fit.source"/>
