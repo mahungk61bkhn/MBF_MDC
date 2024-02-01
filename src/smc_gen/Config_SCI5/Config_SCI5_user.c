@@ -201,7 +201,8 @@ static void r_Config_SCI5_callback_receiveend(void)
 {
     /* Start user code for r_Config_SCI5_callback_receiveend. Do not edit comment generated here */
 	SCI5_rxdone = 1U;
-	memset(rx5_buff, 0, sizeof(rx5_buff));
+//	g_sci5_rx_count	= 0;
+//	memset(rx5_buff, 0, sizeof(rx5_buff));
     /* End user code. Do not edit comment generated here */
 }
 

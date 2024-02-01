@@ -18,77 +18,66 @@ static uint8_t snmp_rx(uint8_t *buf, uint16_t length_buff, char *oid_string, cha
 static uint8_t snmp_gen_setting(SNMP_MANAGER_T *p_snmp,char *oid_string, char *community_str, uint8_t *value, uint8_t value_len, uint8_t type_value );
 static uint8_t snmp_convert_var_2_snmp_var(int32_t  int_var, char *string_var, SNMP_VAR_T *p_snmp_var,uint8_t type_var  );
 static uint8_t snmp_convert_snmp_var_2_var(SNMP_VAR_T *p_snmp_var, int32_t  *int_var, char *string_var,uint8_t *string_var_len,  uint8_t type_var);
+
+
 ///1.==================================================================================================================================
-static int random(int minN, int maxN){
-    return minN + rand() % (maxN + 1 - minN);
+static int random(int minN, int maxN) {
+	return minN + rand() % (maxN + 1 - minN);
 }
 
-static uint8_t random_ID(){
-    uint8_t ret = 0;
-    ret = (uint8_t) (random(MIN_RANDOM,MAX_RANDOM));
-    return ret;
+
+static uint8_t random_ID() {
+	uint8_t ret = 0;
+	ret = (uint8_t) (random(MIN_RANDOM, MAX_RANDOM));
+	return ret;
 }
 
-static uint8_t  snmp_convert_oid(char * oid_string, uint8_t* out_oid){
 
-    uint32_t buff_oid[30];
-    memset(buff_oid,0,sizeof(buff_oid));
-    uint8_t  buff_oid_index = 0;
-    uint8_t  oid_length =0;
+static uint8_t snmp_convert_oid(char *oid_string, uint8_t *out_oid) {
 
-    char *tok = strtok (oid_string, ".");
+	uint32_t buff_oid[30];
+	memset(buff_oid, 0, sizeof(buff_oid));
+	uint8_t buff_oid_index = 0;
+	uint8_t oid_length = 0;
 
-    while (tok != NULL)
-    {
-        buff_oid[buff_oid_index++] = (uint32_t)atoi (tok);
-        tok = strtok (NULL, ".");
-    }
-    *(out_oid+0) =  (uint8_t) (buff_oid[0]*40 + buff_oid[1]);
-    oid_length++;
-    for(uint8_t i =2; i<buff_oid_index;i++){
+	char *tok = strtok(oid_string, ".");
 
-        if (buff_oid[i] <= 0x7F)
-        {
-            *(out_oid + oid_length) = (uint8_t)buff_oid[i];
-            oid_length++;
-        }
-        else
-        {
-            if (buff_oid[i] < 0x4000)
-            {
-                *(out_oid + oid_length) =(uint8_t) (((buff_oid[i]>>7)&(0x007F)) +0x80);
-                oid_length++;
-                *(out_oid + oid_length) =(uint8_t) (buff_oid[i]&(0x007F));
-                oid_length++;
-
-            }
-            else if (buff_oid[i] >= 0x4000)
-            {
-                *(out_oid + oid_length) = (uint8_t) (((buff_oid[i] >> 14) & (0x007F)) + 0x80);
-                oid_length++;
-                *(out_oid + oid_length) = (uint8_t) (((buff_oid[i] >> 7) & (0x007F)) + 0x80);
-                oid_length++;
-                *(out_oid + oid_length) = (uint8_t) (buff_oid[i] & (0x007F));
-                oid_length++;
-
-            }
-
-
-
-        }
-    }
-
-    return oid_length;
+	while (tok != NULL) {
+		buff_oid[buff_oid_index++] = (uint32_t) atoi(tok);
+		tok = strtok(NULL, ".");
+	}
+	*(out_oid + 0) = (uint8_t) (buff_oid[0] * 40 + buff_oid[1]);
+	oid_length++;
+	for (uint8_t i = 2; i < buff_oid_index; i++) {
+		if (buff_oid[i] <= 0x7F) {
+			*(out_oid + oid_length) = (uint8_t) buff_oid[i];
+			oid_length++;
+		} else {
+			if (buff_oid[i] < 0x4000) {
+				*(out_oid + oid_length) = (uint8_t) (((buff_oid[i] >> 7) & (0x007F)) + 0x80);
+				oid_length++;
+				*(out_oid + oid_length) = (uint8_t) (buff_oid[i] & (0x007F));
+				oid_length++;
+			} else if (buff_oid[i] >= 0x4000) {
+				*(out_oid + oid_length) = (uint8_t) (((buff_oid[i] >> 14) & (0x007F)) + 0x80);
+				oid_length++;
+				*(out_oid + oid_length) = (uint8_t) (((buff_oid[i] >> 7) & (0x007F)) + 0x80);
+				oid_length++;
+				*(out_oid + oid_length) = (uint8_t) (buff_oid[i] & (0x007F));
+				oid_length++;
+			}
+		}
+	}
+	return oid_length;
 }
+
 
 ///2.==========================================================================================================================
 static uint8_t  snmp_req(SNMP_MANAGER_T *p_snmp,char *oid_string, char *community_str ){
-
     memset(&p_snmp->pdu_req,0,sizeof(p_snmp->pdu_req));
     memset(p_snmp->data_req,0,sizeof(p_snmp->data_req));
 
     p_snmp->index_data_req = 0;
-
 
     p_snmp->pdu_req.mess_header                 = 0x30;
     p_snmp->pdu_req.length_of_pdu               = 0x00;
@@ -96,51 +85,57 @@ static uint8_t  snmp_req(SNMP_MANAGER_T *p_snmp,char *oid_string, char *communit
     p_snmp->pdu_req.ver_data_type               = INTEGER;
     p_snmp->pdu_req.length_of_version           = 0x01;
     p_snmp->pdu_req.snmp_version                = 0x01;                                //0-snmpv1; 1- snmp v2
-    p_snmp->pdu_req.length_of_pdu               = p_snmp->pdu_req.length_of_pdu +3;
+	p_snmp->pdu_req.length_of_pdu 				= p_snmp->pdu_req.length_of_pdu + 3;
 
     p_snmp->pdu_req.community_data_type         = STRING;
     p_snmp->pdu_req.length_of_community         = (uint8_t)strlen((const char *)community_str);
     sprintf((char *)p_snmp->pdu_req.community_data,"%s","");
     sprintf((char *)p_snmp->pdu_req.community_data,"%s",(const char *)community_str); //public default for snmp v2
-    p_snmp->pdu_req.length_of_pdu               = (uint8_t)(p_snmp->pdu_req.length_of_pdu +2 + p_snmp->pdu_req.length_of_community);
+    p_snmp->pdu_req.length_of_pdu               = (uint8_t)(p_snmp->pdu_req.length_of_pdu + 2 + p_snmp->pdu_req.length_of_community);
 
-    p_snmp->pdu_req.pdu_type                    =  GetRequestPDU;
+    p_snmp->pdu_req.pdu_type                    = GetRequestPDU;
     p_snmp->pdu_req.length_of_pdu_type          = 0x00;
     p_snmp->pdu_req.length_of_pdu               = p_snmp->pdu_req.length_of_pdu +2;
 
-    p_snmp->pdu_req.id_req_data_type            = INTEGER ;
+    p_snmp->pdu_req.id_req_data_type            = INTEGER;
     p_snmp->pdu_req.length_of_id_req            = 0x04;
-    for(uint8_t i= 0; i<4;i++)                  { p_snmp->pdu_req.id_req_data[i] = random_ID();}
-    p_snmp->pdu_req.length_of_pdu               = p_snmp->pdu_req.length_of_pdu +6;
-    p_snmp->pdu_req.length_of_pdu_type          = p_snmp->pdu_req.length_of_pdu_type +6;
+	for (uint8_t i = 0; i < 4; i++) {
+		p_snmp->pdu_req.id_req_data[i] = random_ID();
+	}
+    p_snmp->pdu_req.length_of_pdu               = p_snmp->pdu_req.length_of_pdu + 6;
+    p_snmp->pdu_req.length_of_pdu_type          = p_snmp->pdu_req.length_of_pdu_type + 6;
 
     p_snmp->pdu_req.err_status_data_type        = INTEGER;
     p_snmp->pdu_req.length_of_err_status        = 0x01;
-    p_snmp->pdu_req.err_status_data             = 0x00;;
+    p_snmp->pdu_req.err_status_data             = 0x00;
+
     p_snmp->pdu_req.err_index_data_type         = INTEGER;
     p_snmp->pdu_req.length_of_err_index         = 0x01;
     p_snmp->pdu_req.err_status_index            = 0x00;
-    p_snmp->pdu_req.length_of_pdu               = p_snmp->pdu_req.length_of_pdu +6;
-    p_snmp->pdu_req.length_of_pdu_type          = p_snmp->pdu_req.length_of_pdu_type +6;
+
+    p_snmp->pdu_req.length_of_pdu               = p_snmp->pdu_req.length_of_pdu + 6;
+    p_snmp->pdu_req.length_of_pdu_type          = p_snmp->pdu_req.length_of_pdu_type + 6;
 
     p_snmp->pdu_req.start_var_sequence          = 0x30;
     p_snmp->pdu_req.length_of_start_var_sequence= 0x00;
-    p_snmp->pdu_req.length_of_pdu               = p_snmp->pdu_req.length_of_pdu +2;
-    p_snmp->pdu_req.length_of_pdu_type          = p_snmp->pdu_req.length_of_pdu_type +2;
+
+    p_snmp->pdu_req.length_of_pdu               = p_snmp->pdu_req.length_of_pdu + 2;
+    p_snmp->pdu_req.length_of_pdu_type          = p_snmp->pdu_req.length_of_pdu_type + 2;
 
     p_snmp->pdu_req.start_first_var             = 0x30;
     p_snmp->pdu_req.length_of_first_var         = 0x00;
-    p_snmp->pdu_req.length_of_pdu               = p_snmp->pdu_req.length_of_pdu +2;
+
+    p_snmp->pdu_req.length_of_pdu               = p_snmp->pdu_req.length_of_pdu + 2;
     p_snmp->pdu_req.length_of_pdu_type          = p_snmp->pdu_req.length_of_pdu_type +2;
-    p_snmp->pdu_req.length_of_start_var_sequence= p_snmp->pdu_req.length_of_start_var_sequence+2;
+    p_snmp->pdu_req.length_of_start_var_sequence= p_snmp->pdu_req.length_of_start_var_sequence + 2;
 
     p_snmp->pdu_req.oid_data_type               = OID;
     p_snmp->pdu_req.leng_of_oid                 = snmp_convert_oid(oid_string,p_snmp->pdu_req.oid_value);
 
-    p_snmp->pdu_req.length_of_pdu               = (uint8_t)(p_snmp->pdu_req.length_of_pdu + p_snmp->pdu_req.leng_of_oid+2);
-    p_snmp->pdu_req.length_of_pdu_type          = (uint8_t)(p_snmp->pdu_req.length_of_pdu_type + p_snmp->pdu_req.leng_of_oid+2);
-    p_snmp->pdu_req.length_of_start_var_sequence= (uint8_t)(p_snmp->pdu_req.length_of_start_var_sequence + p_snmp->pdu_req.leng_of_oid+2);
-    p_snmp->pdu_req.length_of_first_var         = (uint8_t)(p_snmp->pdu_req.length_of_first_var + p_snmp->pdu_req.leng_of_oid+2);
+	p_snmp->pdu_req.length_of_pdu 					= (uint8_t) (p_snmp->pdu_req.length_of_pdu + p_snmp->pdu_req.leng_of_oid + 2);
+	p_snmp->pdu_req.length_of_pdu_type 				= (uint8_t) (p_snmp->pdu_req.length_of_pdu_type + p_snmp->pdu_req.leng_of_oid + 2);
+	p_snmp->pdu_req.length_of_start_var_sequence 	= (uint8_t) (p_snmp->pdu_req.length_of_start_var_sequence + p_snmp->pdu_req.leng_of_oid + 2);
+	p_snmp->pdu_req.length_of_first_var 			= (uint8_t) (p_snmp->pdu_req.length_of_first_var + p_snmp->pdu_req.leng_of_oid + 2);
 
     //p_snmp->pdu_req.oid_value[30];
     p_snmp->pdu_req.end_of_var                  = NULLTYPE;
@@ -153,55 +148,48 @@ static uint8_t  snmp_req(SNMP_MANAGER_T *p_snmp,char *oid_string, char *communit
 
     //============================================================================================
     p_snmp->index_data_req = 0;
-    p_snmp->data_req[p_snmp->index_data_req++]         =p_snmp->pdu_req.mess_header;
-    p_snmp->data_req[p_snmp->index_data_req++]         =p_snmp->pdu_req.length_of_pdu;
-
-    p_snmp->data_req[p_snmp->index_data_req++]         =p_snmp->pdu_req.ver_data_type;
-    p_snmp->data_req[p_snmp->index_data_req++]         =p_snmp->pdu_req.length_of_version;
-    p_snmp->data_req[p_snmp->index_data_req++]         =p_snmp->pdu_req.snmp_version;
-
-    p_snmp->data_req[p_snmp->index_data_req++]         =p_snmp->pdu_req.community_data_type;
-    p_snmp->data_req[p_snmp->index_data_req++]         =p_snmp->pdu_req.length_of_community;
-
-    for(uint8_t i=0; i<p_snmp->pdu_req.length_of_community;i++){
-        p_snmp->data_req[p_snmp->index_data_req++]     =p_snmp->pdu_req.community_data[i];
-    }
-
-
-    p_snmp->data_req[p_snmp->index_data_req++]         =p_snmp->pdu_req.pdu_type;
-    p_snmp->data_req[p_snmp->index_data_req++]         =p_snmp->pdu_req.length_of_pdu_type;
-    p_snmp->data_req[p_snmp->index_data_req++]         =p_snmp->pdu_req.id_req_data_type;
-    p_snmp->data_req[p_snmp->index_data_req++]         =p_snmp->pdu_req.length_of_id_req;
-
-    for(uint8_t i=0; i<p_snmp->pdu_req.length_of_id_req;i++) {
-        p_snmp->data_req[p_snmp->index_data_req++]     = p_snmp->pdu_req.id_req_data[i];
-    }
+    p_snmp->data_req[p_snmp->index_data_req++]         = p_snmp->pdu_req.mess_header;
+    p_snmp->data_req[p_snmp->index_data_req++]         = p_snmp->pdu_req.length_of_pdu;
+    p_snmp->data_req[p_snmp->index_data_req++]         = p_snmp->pdu_req.ver_data_type;
+    p_snmp->data_req[p_snmp->index_data_req++]         = p_snmp->pdu_req.length_of_version;
+    p_snmp->data_req[p_snmp->index_data_req++]         = p_snmp->pdu_req.snmp_version;
+    p_snmp->data_req[p_snmp->index_data_req++]         = p_snmp->pdu_req.community_data_type;
+    p_snmp->data_req[p_snmp->index_data_req++]         = p_snmp->pdu_req.length_of_community;
+	for (uint8_t i = 0; i < p_snmp->pdu_req.length_of_community; i++) {
+		p_snmp->data_req[p_snmp->index_data_req++] = p_snmp->pdu_req.community_data[i];
+	}
+    p_snmp->data_req[p_snmp->index_data_req++]         = p_snmp->pdu_req.pdu_type;
+    p_snmp->data_req[p_snmp->index_data_req++]         = p_snmp->pdu_req.length_of_pdu_type;
+    p_snmp->data_req[p_snmp->index_data_req++]         = p_snmp->pdu_req.id_req_data_type;
+    p_snmp->data_req[p_snmp->index_data_req++]         = p_snmp->pdu_req.length_of_id_req;
+	for (uint8_t i = 0; i < p_snmp->pdu_req.length_of_id_req; i++) {
+		p_snmp->data_req[p_snmp->index_data_req++] = p_snmp->pdu_req.id_req_data[i];
+	}
     p_snmp->data_req[p_snmp->index_data_req++]         = p_snmp->pdu_req.err_status_data_type;
     p_snmp->data_req[p_snmp->index_data_req++]         = p_snmp->pdu_req.length_of_err_status;
     p_snmp->data_req[p_snmp->index_data_req++]         = p_snmp->pdu_req.err_status_data;
     p_snmp->data_req[p_snmp->index_data_req++]         = p_snmp->pdu_req.err_index_data_type;
     p_snmp->data_req[p_snmp->index_data_req++]         = p_snmp->pdu_req.length_of_err_index;
     p_snmp->data_req[p_snmp->index_data_req++]         = p_snmp->pdu_req.err_status_index;
-
     p_snmp->data_req[p_snmp->index_data_req++]         = p_snmp->pdu_req.start_var_sequence;
     p_snmp->data_req[p_snmp->index_data_req++]         = p_snmp->pdu_req.length_of_start_var_sequence;
-
     p_snmp->data_req[p_snmp->index_data_req++]         = p_snmp->pdu_req.start_first_var;
     p_snmp->data_req[p_snmp->index_data_req++]         = p_snmp->pdu_req.length_of_first_var;
-
     p_snmp->data_req[p_snmp->index_data_req++]         = p_snmp->pdu_req.oid_data_type;
     p_snmp->data_req[p_snmp->index_data_req++]         = p_snmp->pdu_req.leng_of_oid;
-
-    for(uint8_t i=0;i<p_snmp->pdu_req.leng_of_oid;i++){
-        p_snmp->data_req[p_snmp->index_data_req++]     = p_snmp->pdu_req.oid_value[i];
-    }
+	for (uint8_t i = 0; i < p_snmp->pdu_req.leng_of_oid; i++) {
+		p_snmp->data_req[p_snmp->index_data_req++] = p_snmp->pdu_req.oid_value[i];
+	}
     p_snmp->data_req[p_snmp->index_data_req++]         = p_snmp->pdu_req.end_of_var;
     p_snmp->data_req[p_snmp->index_data_req++]         = p_snmp->pdu_req.end_of_mess_header;
 
-    if(p_snmp->index_data_req<p_snmp->pdu_req.length_of_pdu) return ERR;
+	if (p_snmp->index_data_req < p_snmp->pdu_req.length_of_pdu)
+		return ERR;
 
     return NO_ERR;
 }
+
+
 ///3.============================================================================================================================
 static uint8_t snmp_rx(uint8_t *buf, uint16_t length_buff, char *oid_string, char *community_str, uint8_t* var_out,uint8_t *var_out_len,uint8_t *type_value_out){
 	uint16_t idx;
@@ -407,11 +395,11 @@ static uint8_t snmp_gen_setting(SNMP_MANAGER_T *p_snmp,char *oid_string, char *c
 	return NO_ERR;
 
 }
+
+
 ///5.======================================================================================================================
 uint8_t snmp_get_var(SNMP_MANAGER_T *p_snmp, char *oid_string, char *community_str,int32_t *int_var_out, char *string_var_out, uint8_t *string_var_out_len , uint8_t type_var,  uint16_t delay){
-
 	uint8_t err_snmp = NO_ERR;
-
 	SNMP_VAR_T p_snmp_var_out;
 
 	err_snmp = snmp_req(p_snmp, oid_string, community_str);
@@ -433,6 +421,8 @@ uint8_t snmp_get_var(SNMP_MANAGER_T *p_snmp, char *oid_string, char *community_s
 
 	return err_snmp;
 }
+
+
 ///6.=========================================================================================================================
 uint8_t snmp_set_var(SNMP_MANAGER_T *p_snmp,char *oid_string, char *community_str_set,int32_t  int_var_in, char *string_var_in ,int32_t  *int_var_out, char *string_var_out,uint8_t *string_var_out_len, uint8_t type_var, uint16_t delay){
 
@@ -553,33 +543,33 @@ static uint8_t snmp_convert_snmp_var_2_var(SNMP_VAR_T *p_snmp_var, int32_t  *int
 }
 ///9.=====================================================================================
 
-uint8_t snmp_get_var_to_reg(SNMP_MANAGER_T *p_snmp, char *oid_string, char *community_str,int32_t *int_var_out, char *string_var_out,
-		uint8_t *string_var_out_len , uint8_t type_var,  uint16_t delay, uint16_t* reg,uint8_t *cnt_filter){
+uint8_t snmp_get_var_to_reg(SNMP_MANAGER_T *p_snmp, char *oid_string,
+		char *community_str, int32_t *int_var_out, char *string_var_out,
+		uint8_t *string_var_out_len, uint8_t type_var, uint16_t delay,
+		uint16_t *reg, uint8_t *cnt_filter) {
 	uint8_t err_snmp = NO_ERR;
-	(*int_var_out) =0;
+	(*int_var_out) = 0;
 	uint16_t u16_temp;
-	err_snmp = snmp_get_var(p_snmp,oid_string,community_str,int_var_out,string_var_out,string_var_out_len,type_var,delay);
+	err_snmp = snmp_get_var(p_snmp, oid_string, community_str, int_var_out, string_var_out, string_var_out_len, type_var, delay);
 
-
-
-	if(err_snmp ==NO_ERR ) {
+	if (err_snmp == NO_ERR) {
 		if ((*int_var_out) == 0) {
 			if ((*cnt_filter)++ > 15) {
-				u16_temp      = (uint16_t ) (*int_var_out);
-				(*reg )       =  u16_temp;
+				u16_temp = (uint16_t ) (*int_var_out);
+				(*reg) = u16_temp;
 				(*cnt_filter) = 0;
 			}
 		} else {
 			if (strcmp(oid_string,TOTAL_RECT_DC_POWER) == 0) {
-				u16_temp    = (uint16_t) ((*int_var_out) / 1000);
-			}else{
-				u16_temp     = (uint16_t ) (*int_var_out);
+				u16_temp = (uint16_t) ((*int_var_out) / 1000);
+			} else {
+				u16_temp = (uint16_t ) (*int_var_out);
 			}
 
-			(*reg)         =  u16_temp;
-			(*cnt_filter)  = 0;
+			(*reg) = u16_temp;
+			(*cnt_filter) = 0;
 		}
-	}else{
+	} else {
 		(*reg) = 0xFFFF;
 	}
 	return err_snmp;
@@ -591,23 +581,28 @@ extern uint16_t MDC_regs[125];
 uint16_t err_cnt =0;
 uint16_t no_err_cnt=0;
 uint8_t  cnt_filter[60];
+
 uint8_t handler_snmp(void){
 	static uint8_t step =0;
 	uint8_t err_snmp;
         switch(step++){
         case 0:
-        	snmp_get_var_to_reg(&snmp_manager_t,BATT1_VOLT,COMMUNITY_STRING,&var_snmp_out,NULL,NULL,INTEGER,DELAY_MS,&MDC_regs[0],&cnt_filter[0]);
+        	snmp_get_var_to_reg(&snmp_manager_t, BATT1_VOLT, COMMUNITY_STRING,
+        			&var_snmp_out, NULL, NULL, INTEGER, DELAY_MS, &MDC_regs[0], &cnt_filter[0]);
         	//R_BSP_SoftwareDelay(5, BSP_DELAY_MILLISECS);
-        	snmp_get_var_to_reg(&snmp_manager_t,BATT2_VOLT,COMMUNITY_STRING,&var_snmp_out,NULL,NULL,INTEGER,DELAY_MS,&MDC_regs[1],&cnt_filter[1]);
+        	snmp_get_var_to_reg(&snmp_manager_t, BATT2_VOLT, COMMUNITY_STRING,
+        			&var_snmp_out, NULL, NULL, INTEGER, DELAY_MS, &MDC_regs[1], &cnt_filter[1]);
         	//R_BSP_SoftwareDelay(5, BSP_DELAY_MILLISECS);
-        	snmp_get_var_to_reg(&snmp_manager_t,BATT3_VOLT,COMMUNITY_STRING,&var_snmp_out,NULL,NULL,INTEGER,DELAY_MS,&MDC_regs[2],&cnt_filter[2]);
+        	snmp_get_var_to_reg(&snmp_manager_t, BATT3_VOLT, COMMUNITY_STRING,
+        			&var_snmp_out, NULL, NULL, INTEGER, DELAY_MS, &MDC_regs[2], &cnt_filter[2]);
         	//R_BSP_SoftwareDelay(5, BSP_DELAY_MILLISECS);
-        	err_snmp = snmp_get_var_to_reg(&snmp_manager_t,SYS_DC_VOLT,COMMUNITY_STRING,&var_snmp_out,NULL,NULL,INTEGER,DELAY_MS,&MDC_regs[3],&cnt_filter[3]);
+        	err_snmp = snmp_get_var_to_reg(&snmp_manager_t, SYS_DC_VOLT, COMMUNITY_STRING,
+        			&var_snmp_out, NULL, NULL, INTEGER, DELAY_MS, &MDC_regs[3], &cnt_filter[3]);
         	//R_BSP_SoftwareDelay(5, BSP_DELAY_MILLISECS);
-        	if(err_snmp== NO_ERR){
-        	   no_err_cnt++;
-        	}else{
-        	   err_cnt++;
+        	if (err_snmp == NO_ERR) {
+        		no_err_cnt++;
+        	} else {
+        		err_cnt++;
         	}
 
         	snmp_get_var_to_reg(&snmp_manager_t,BATT1_CURR,COMMUNITY_STRING,&var_snmp_out,NULL,NULL,INTEGER,DELAY_MS,&MDC_regs[5],&cnt_filter[5]);
@@ -624,17 +619,18 @@ uint8_t handler_snmp(void){
         	//R_BSP_SoftwareDelay(5, BSP_DELAY_MILLISECS);
 
         	//snmp_get_var_to_reg(&snmp_manager_t,OID_STRING_1,COMMUNITY_STRING,&var_snmp_out,NULL,NULL,INTEGER,DELAY_MS,&MDC_regs[52]);
-        	/*
-        	err_snmp = snmp_get_var(&snmp_manager_t,OID_STRING_1,COMMUNITY_STRING,&var_snmp_out,NULL,NULL,INTEGER,20);
-        	//err_snmp=snmp_get_var_to_reg(&snmp_manager_t,SYS_DC_VOLT,COMMUNITY_STRING,&var_snmp_out,NULL,NULL,INTEGER,100,&mdc_reg[3]);
-        	if(err_snmp== NO_ERR){
-        		mdc_reg[3] = (uint16_t)var_snmp_out;
-        		no_err_cnt++;
-        	}else{
-        		mdc_reg[3] = 0xffff;
-        		err_cnt++;
-        	}
-        	//*/
+/*
+        	err_snmp = snmp_get_var(&snmp_manager_t, OID_STRING_1, COMMUNITY_STRING, &var_snmp_out, NULL, NULL, INTEGER, 20);
+			//err_snmp=snmp_get_var_to_reg(&snmp_manager_t,SYS_DC_VOLT,COMMUNITY_STRING,&var_snmp_out,NULL,NULL,INTEGER,100,&mdc_reg[3]);
+			if (err_snmp == NO_ERR) {
+				mdc_reg[3] = (uint16_t) var_snmp_out;
+				no_err_cnt++;
+			} else {
+				mdc_reg[3] = 0xffff;
+				err_cnt++;
+			}
+        	//
+*/
         	break;
         case 1:
         	snmp_get_var_to_reg(&snmp_manager_t,POWER_2,COMMUNITY_STRING,&var_snmp_out,NULL,NULL,INTEGER,DELAY_MS,&MDC_regs[13],&cnt_filter[13]);

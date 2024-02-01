@@ -35,7 +35,7 @@ static char print_str[150];
 #define CALIB_EN	(PORTH.PIDR.BIT.B2)
 /********************** Modbus MDC Register Values (MDC as Slave)************************************/
 #define MDC_ID 0x05
-#define MDC_VERSION 8
+#define MDC_VERSION 9
 #define MDC_NUM_REGS 320
 uint16_t MDC_regs[MDC_NUM_REGS];
 uint8_t transmit_ctrl = 0; // enable transmit to MCC
@@ -165,7 +165,7 @@ void main(void)
 	MDC_regs[100] = 0; // Bootloader Status Register
 	MDC_regs[101] = 0; // Bootloader Control Register
 	MDC_regs[102] = MDC_VERSION; // Bootloader Version Register
-	MDC_regs[103] = 0; // Huawei ACCU
+	MDC_regs[103] = 0;
 	tick = 0;
 	charge_time_count = 0;
 	discharge_time_count = 0;
@@ -174,9 +174,9 @@ void main(void)
 	MCU_LED_MCC = 0;
 
 	// WTD impulse
-	WDI =1;
+	WDI = 1;
 	R_BSP_SoftwareDelay(5, BSP_DELAY_MICROSECS);
-	WDI =0;
+	WDI = 0;
 
 	memset(&data_calib, 0, sizeof(data_calib));
 	memset(&data_time, 0, sizeof(data_time));
@@ -263,8 +263,7 @@ void main(void)
 
 	while(1)
 	{
-		R_BSP_SoftwareDelay(200, BSP_DELAY_MILLISECS);
-		if (g_sci5_rx_count > 7)
+		/*if (g_sci5_rx_count > 7)
 		{
 			RS485_Slave_Mode();
 		}
@@ -323,10 +322,10 @@ void main(void)
 			}
 			else
 			{
-				discharge_start=0; //stop count
-				charge_start=0;
-				MDC_regs[56] =0;
-				MDC_regs[57] =0;
+				discharge_start = 0; //stop count
+				charge_start = 0;
+				MDC_regs[56] = 0;
+				MDC_regs[57] = 0;
 			}
 
 			MDC_regs[21] = (uint16_t)(charge_time_count/300); // 200ms*(5*60) = 1min
@@ -350,11 +349,95 @@ void main(void)
 				deviceFlash_erase4k(charge_discharge_time_addr);
 				deviceFlash_writeData(charge_discharge_time_addr, savedata, sizeof(savedata));
 			}
+		} */
+
+		R_BSP_SoftwareDelay(500, BSP_DELAY_MILLISECS);
+		if (g_sci5_rx_count <= 7)
+		{
+			// Start counting time out MCC connection
+			is_slave = 1;
+			continue;
+		}
+		is_slave = 0;
+		RS485_Slave_Mode();
+
+		//Disable transmit to MCC
+		if (MDC_regs[99] == 1) {
+			transmit_ctrl = 1;
+		} else {
+			transmit_ctrl = 0;
+		}
+
+		//Boot loader Mode
+		if (MDC_regs[101] == 1) {
+			main_FW_update();
+		}
+
+		measure();
+		// Read parameters from Huawei Box and Baterry ACCU
+		if (MDC_regs[47] == 1) // Read From Electrical Box
+		{
+			RS485_Master_Mode();
+		}
+
+		//DC Low Warning
+		if (((MDC_regs[0] > 3600) && (MDC_regs[0] < (MDC_regs[46] * 100)))
+				|| ((MDC_regs[1] > 3600) && (MDC_regs[1] < (MDC_regs[46] * 100)))
+				|| ((MDC_regs[2] > 3600) && (MDC_regs[2] < (MDC_regs[46] * 100)))
+				|| ((MDC_regs[3] > 3600) && (MDC_regs[3] < (MDC_regs[46] * 100))))
+		{
+			MDC_regs[43] = 1; // DC low warning register
+		} else {
+			MDC_regs[43] = 0;
+		}
+
+		//DC discharge time count
+		if ((MDC_regs[5] > 300) || (MDC_regs[6] > 300) || (MDC_regs[7] > 300) || (MDC_regs[8] > 300)) //discharging/charging
+		{
+			if (charge_discharge_sts == 0) {
+				discharge_start = 1; //start count
+				MDC_regs[57] = 1;
+				charge_start = 0;
+				MDC_regs[56] = 0;
+			} else {
+				charge_start = 1;
+				MDC_regs[56] = 1;
+				discharge_start = 0; //start count
+				MDC_regs[57] = 0;
+			}
+		}
+		else
+		{
+			discharge_start = 0; //stop count
+			charge_start = 0;
+			MDC_regs[56] = 0;
+			MDC_regs[57] = 0;
+		}
+
+		MDC_regs[21] = (uint16_t)(charge_time_count/300); // 200ms*(5*60) = 1min
+		MDC_regs[22] = (uint16_t)(discharge_time_count/300); // 200ms*(5*60) = 1min
+		uint32_t lasttick = tick;
+
+		// Save time to flash
+		//			chargtimeH = (uint16_t)(charge_time_count>>16);
+		//			chargtimeL = (uint16_t)(charge_time_count& 0xFFFF);
+		//			dischargtimeH = (uint16_t)(discharge_time_count>>16);
+		//			dischargtimeL = (uint16_t)(discharge_time_count& 0xFFFF);
+		//			Flash_Sector_Erase(charge_discharge_time_addr);
+		//			Flash_write(charge_discharge_time_addr,chargtimeH, chargtimeL, dischargtimeH,dischargtimeL,MCC_timeout_flag,0,0,0);
+
+		if (tick - lasttick > 1000 * 60) {
+			lasttick = tick;
+			uint32_t savedata[3];
+			savedata[0] = charge_time_count;
+			savedata[1] = discharge_time_count;
+			savedata[2] = MCC_timeout_flag;
+			deviceFlash_erase4k(charge_discharge_time_addr);
+			deviceFlash_writeData(charge_discharge_time_addr, savedata, sizeof(savedata));
 		}
 
 // thanh test===============================
 		//		measure();// Put in to MASTER MODE PART AFTER TEST
-
 		//print test
 		//		sprintf(print_str,"\r\nCHECK 0: %d 5: %d 23: %d 24: %d 25: %d 26: %d",MDC_regs[0],MDC_regs[5],MDC_regs[23],MDC_regs[24],MDC_regs[25],MDC_regs[26]);
 		//		RS485_M_Ctr = 1U; //RS485 send mode
@@ -524,6 +607,7 @@ void RS485_Slave_Mode()
 			memset(print_str, 0, sizeof(print_str));
 			RS485_S_Ctr = 0U; //RS485 send mod
 		}
+
 		//CALIB MODE LED_BUZZER_CHECK
 		else if ((rx5_buff[i]== 'L')&&(rx5_buff[i+1]== 'E')&&(rx5_buff[i+15]== 'K'))
 		{
@@ -542,13 +626,12 @@ void RS485_Slave_Mode()
 				BUZZER =0;
 				R_BSP_SoftwareDelay(50, BSP_DELAY_MILLISECS);
 			}
-
 		}
+
 		//CALIB MODE DATA_CHECK
 		else if ((rx5_buff[i]== 'D')&&(rx5_buff[i+1]== 'A')&&(rx5_buff[i+9]== 'K'))
 		{
 //			measure();
-
 			RS485_S_Ctr = 1U; //RS485 send mode
 			sprintf(print_str,"\r\n%d_%d_%d_%d_%d_%d_%d_%d_%d_%d_%d_%d\r\n",
 					(int16_t)MDC_regs[0x00],(int16_t)MDC_regs[0x01],(int16_t)MDC_regs[0x02],(int16_t)MDC_regs[0x03],
@@ -558,6 +641,7 @@ void RS485_Slave_Mode()
 			memset(print_str, 0, sizeof(print_str));
 			RS485_S_Ctr = 0U; //RS485 send mode
 		}
+
 		//RESET_CHARGE_TIME
 		else if ((rx5_buff[i]== 'R')&&(rx5_buff[i+13]== 'T')&&(rx5_buff[i+6]== 'C'))
 		{
@@ -578,9 +662,8 @@ void RS485_Slave_Mode()
 			R_SCI5_AsyncTransmit((uint8_t*)print_str,strlen(print_str),transmit_ctrl);
 			RS485_S_Ctr = 0U; //RS485 Master receive mode
 			memset(print_str, 0, sizeof(print_str));
-
-
 		}
+
 		//RESET_OFFSET
 		else if ((rx5_buff[i]== 'R')&&(rx5_buff[i+1]== 'E')&&(rx5_buff[i+6]== 'O'))
 		{
@@ -606,6 +689,7 @@ void RS485_Slave_Mode()
 			memset(print_str, 0, sizeof(print_str));
 			RS485_S_Ctr = 0U; //RS485 send mode
 		}
+
 		//CALIB MODE CALIB_vvvvv_vvvvv_vvvvv_vvvvv_iiiii_iiiii_iiiii_iiiii
 		else if ((rx5_buff[i]== 'C')&&(rx5_buff[i+1]== 'A')&&(rx5_buff[i+5]== '_'))
 		{
@@ -664,7 +748,6 @@ void RS485_Slave_Mode()
 					OFFSET_V1 = CALIB_INIT_V1 - (uint16_t)(volt_measure(ADC_Volt1,1) );
 					data_calib[0] = (uint8_t)(OFFSET_V1>>8);
 					data_calib[1] = (uint8_t)(OFFSET_V1 & 0xFF);
-
 				}
 				if(CALIB_INIT_V2<99999)
 				{
@@ -687,7 +770,6 @@ void RS485_Slave_Mode()
 					data_calib[6] = (uint8_t)(OFFSET_V4>>8);
 					data_calib[7] = (uint8_t)(OFFSET_V4 & 0xFF);
 				}
-
 				if(CALIB_INIT_I1<99999)
 				{
 					OFFSET_I1=0;
@@ -716,7 +798,6 @@ void RS485_Slave_Mode()
 					data_calib[14] = (uint8_t)(OFFSET_I4>>8);
 					data_calib[15] = (uint8_t)(OFFSET_I4 & 0xFF);
 				}
-
 
 				RS485_S_Ctr = 1U; //RS485 send mode
 				sprintf(print_str,"\r\nV_Offset: %d %d %d %d\r\n",OFFSET_V1,OFFSET_V2,OFFSET_V3,OFFSET_V4);
@@ -758,6 +839,7 @@ void RS485_Slave_Mode()
 			RS485_S_Ctr = 0U; //RS485 send mod
 			Buzzer(3, 80);
 		}
+
 		//WRITE MULTIPLE REGISTERS COMMAND - write TIME register 0x002C-0x002D (02 registers - 0x02)
 		// 13 Bytes: Slave_add|Func|Add_Hi|Add_Lo|Quantity_Hi|Quantity_Lo|Byte_count|(Data_Hi|Data_lo)*Quantity|CRC*2
 		else if ((rx5_buff[i]== MDC_ID)&&(rx5_buff[i+1]== 0x10)&&(rx5_buff[i+3]==0x2C)) //ID & WRITE MULTIPLE REGISTERS COMMAND
@@ -807,8 +889,9 @@ void RS485_Slave_Mode()
 			{
 				// wrong CRC
 			}
+			g_sci5_rx_count = 0;
+			memset(rx5_buff, 0, sizeof(rx5_buff));
 		}
-
 
 		// READ MULTIPLE REGISTER 0x03 Command full function
 		// 8 Bytes
@@ -864,8 +947,9 @@ void RS485_Slave_Mode()
 			{
 				//wrong CRC
 			}
+			g_sci5_rx_count = 0;
+			memset(rx5_buff, 0, sizeof(rx5_buff));
 		}
-
 
 		// WRITE SINGLE REGISTER: 0x002F-READ MODE, 0x0065 - Bootloader Control
 		// 8 Bytes
@@ -901,6 +985,8 @@ void RS485_Slave_Mode()
 			} else {
 				//wrong CRC
 			}
+			g_sci5_rx_count = 0;
+			memset(rx5_buff, 0, sizeof(rx5_buff));
 		}
 
 		//WRITE MULTIPLE REGISTERS COMMAND - write 1 register 0x002E DC LOW threshold
@@ -931,11 +1017,11 @@ void RS485_Slave_Mode()
 				RS485_S_Ctr = 0U; // RS485 receive mode
 				is_slave = 0; // Switch to Master mode after response to MCC
 			}
+			g_sci5_rx_count = 0;
+			memset(rx5_buff, 0, sizeof(rx5_buff));
 		}
+		R_Config_SCI5_Serial_Receive((uint8_t*)&rx5_buff, sizeof(rx5_buff));
 	}
-	g_sci5_rx_count=0;
-	memset(rx5_buff, 0, sizeof(rx5_buff));
-	R_Config_SCI5_Serial_Receive((uint8_t*)&rx5_buff, sizeof(rx5_buff));
 }
 
 
@@ -957,18 +1043,22 @@ void RS485_M_Read_and_Receive(uint8_t slaveID, uint16_t Register, uint8_t *reque
 	*(request+1) = 0x03;
 	//address register
 	uint16_to_uint8(Register, request+2, request+3);
-	*(request+4) = 0;
-	*(request+5) = 1;
+	*(request + 4) = 0;
+	*(request + 5) = 1;
 	CRC16 = CRC16_bytewise(request, 6);
-	*(request+6) = CRC16 & 0xff;
-	*(request+7) = CRC16 >> 8;
-	R_Config_SCI1_Serial_Receive((uint8_t*)&rx1_buff, 7);
+	*(request + 6) = CRC16 & 0xff;
+	*(request + 7) = CRC16 >> 8;
 	RS485_M_Ctr = 1U; //RS485 send mode
-	R_SCI1_AsyncTransmit(request,8);
+	R_SCI1_AsyncTransmit(request, 8);
 	RS485_M_Ctr = 0U; //RS485 receive mode
-	uint32_t lasttick = tick;
-	while((!SCI1_rxdone) && (tick-lasttick < 100));
-	if(SCI1_rxdone==1)
+
+	R_Config_SCI1_Serial_Receive((uint8_t*)&rx1_buff, 7);
+	R_BSP_SoftwareDelay(100, BSP_DELAY_MILLISECS);
+
+//	uint32_t lasttick = tick;
+//	while((!SCI1_rxdone) && (tick - lasttick < 100));
+
+	if(SCI1_rxdone == 1)
 	{
 		//print test
 //		uint8_t i=0;
@@ -978,16 +1068,15 @@ void RS485_M_Read_and_Receive(uint8_t slaveID, uint16_t Register, uint8_t *reque
 //			R_SCI1_AsyncTransmit((uint8_t*)print_str,3);
 //			memset(print_str, 0, sizeof(print_str));
 //		}
-		if((rx1_buff[0]== slaveID)&&(rx1_buff[1]==0x03))
+		if((rx1_buff[0] == slaveID) && (rx1_buff[1] == 0x03))
 		{
 			CRC16 = CRC16_bytewise(rx1_buff, 5);
 			CRC8[0] = CRC16 & 0xff;
 			CRC8[1] = CRC16 >> 8;
-			if ((CRC8[0]== rx1_buff[5])&&(CRC8[1]== rx1_buff[6])) //CRC check
+			if((CRC8[0] == rx1_buff[5]) && (CRC8[1] == rx1_buff[6])) //CRC check
 			{
-
-				PSU_connect_flag=1; // PSU Connected
-				*Value = (uint16_t)(rx1_buff[3]<<8) + (uint16_t)(rx1_buff[4]);
+				PSU_connect_flag = 1; // PSU Connected
+				*Value = (uint16_t)(rx1_buff[3] << 8) + (uint16_t)(rx1_buff[4]);
 				//print test
 //				sprintf(print_str,"\n\r  Value of %d register: %d \n\r",Register, *Value);
 //				R_SCI1_AsyncTransmit((uint8_t*)print_str,strlen(print_str));
@@ -999,14 +1088,16 @@ void RS485_M_Read_and_Receive(uint8_t slaveID, uint16_t Register, uint8_t *reque
 		{
 			//wrong CRC
 		}
-		SCI1_rxdone =0;
+		SCI1_rxdone = 0;
 	}
 	else
 	{
 		// for timeout counting
-		PSU_connect_flag=0; //PSU not connected
+		PSU_connect_flag = 0; //PSU not connected
 	}
 }
+
+
 void RS485_M_Read_Batt(uint8_t slaveID, uint16_t Start_Add, uint16_t NbRgt ,uint8_t *request, uint16_t * BattRegs) //Store message in Response
 {
 	memset(request, 0, sizeof(request));
@@ -1017,18 +1108,16 @@ void RS485_M_Read_Batt(uint8_t slaveID, uint16_t Start_Add, uint16_t NbRgt ,uint
 	*request = slaveID;
 	*(request+1) = 0x03;
 	//address register
-	uint16_to_uint8(Start_Add, request+2, request+3);
-	uint16_to_uint8(NbRgt, request+4, request+5);
+	uint16_to_uint8(Start_Add, request + 2, request + 3);
+	uint16_to_uint8(NbRgt, request + 4, request + 5);
 	CRC16 = CRC16_bytewise(request, 6);
-	*(request+6) = CRC16 & 0xff;
-	*(request+7) = CRC16 >> 8;
+	*(request + 6) = CRC16 & 0xff;
+	*(request + 7) = CRC16 >> 8;
 
-	R_Config_SCI1_Serial_Receive((uint8_t*)&rx1_buff, (5+NbRgt*2));
 	RS485_M_Ctr = 1U; //RS485 send mode
-	R_SCI1_AsyncTransmit(request,8);
+	R_SCI1_AsyncTransmit(request, 8);
 	RS485_M_Ctr = 0U; //RS485 receive mode
 
-	uint32_t lasttick = tick;
 	//print test
 //	sprintf(print_str,"\n\r SEND: ");
 //	RS485_S_Ctr = 1U; //RS485 send mode
@@ -1045,8 +1134,13 @@ void RS485_M_Read_Batt(uint8_t slaveID, uint16_t Start_Add, uint16_t NbRgt ,uint
 //	}
 	//end_print_test
 
-	while((!SCI1_rxdone) && (tick-lasttick< NbRgt*10));
-	if(SCI1_rxdone==1)
+	R_Config_SCI1_Serial_Receive((uint8_t*) &rx1_buff, (5 + NbRgt * 2));
+	R_BSP_SoftwareDelay(500, BSP_DELAY_MILLISECS);
+
+/*	uint32_t lasttick = tick;
+	while((!SCI1_rxdone) && (tick - lasttick < NbRgt * 10));*/
+
+	if(SCI1_rxdone == 1)
 	{
 		//print test
 //		sprintf(print_str,"\n\r RECEIVE: ");
@@ -1063,18 +1157,18 @@ void RS485_M_Read_Batt(uint8_t slaveID, uint16_t Start_Add, uint16_t NbRgt ,uint
 //			memset(print_str, 0, sizeof(print_str));
 //		}
 		//end_print_test
-		if((rx1_buff[0]== slaveID)&&(rx1_buff[1]==0x03))
+
+		if((rx1_buff[0] == slaveID) && (rx1_buff[1] == 0x03))
 		{
-			CRC16 = CRC16_bytewise(rx1_buff, 3+NbRgt*2);
+			CRC16 = CRC16_bytewise(rx1_buff, 3 + NbRgt * 2);
 			CRC8[0] = CRC16 & 0xff;
 			CRC8[1] = CRC16 >> 8;
-			if ((CRC8[0]== rx1_buff[3+NbRgt*2])&&(CRC8[1]== rx1_buff[4+NbRgt*2])) //CRC check
+			if((CRC8[0] == rx1_buff[3 + NbRgt * 2]) && (CRC8[1] == rx1_buff[4 + NbRgt * 2])) //CRC check
 			{
-				for(uint16_t i=0;i<NbRgt;i++)
+				for (uint16_t i = 0; i < NbRgt; i++)
 				{
-					BattRegs[i] = (uint16_t)(rx1_buff[i*2+3]<<8) + (uint16_t)(rx1_buff[i*2+4]);
+					BattRegs[i] = (uint16_t) (rx1_buff[i * 2 + 3] << 8) + (uint16_t) (rx1_buff[i * 2 + 4]);
 //					if (BattRegs[i]>32768) BattRegs[i]=0;
-
 					//print test
 //					sprintf(print_str,"%02X ",BattRegs[i]);
 //					RS485_M_Ctr = 1U; //RS485 send mode
@@ -1083,6 +1177,7 @@ void RS485_M_Read_Batt(uint8_t slaveID, uint16_t Start_Add, uint16_t NbRgt ,uint
 //					memset(print_str, 0, sizeof(print_str));
 					//end_print_test
 				}
+
 				if(Start_Add == 0xA731) //0xA731
 				{
 					MDC_regs[0] = ((BattRegs[1]==65535)?0:BattRegs[1])*10;
@@ -1103,7 +1198,6 @@ void RS485_M_Read_Batt(uint8_t slaveID, uint16_t Start_Add, uint16_t NbRgt ,uint
 
 					MDC_regs[12] = ((BattRegs[58]==65535)?0:(BattRegs[58]/100));
 					MDC_regs[13] = ((BattRegs[122]==65535)?0:(BattRegs[122]/100));
-
 
 //					//print test
 //					sprintf(print_str,"\r\n0: %d 5: %d 23: %d 24: %d 25: %d 26: %d",MDC_regs[0],MDC_regs[5],MDC_regs[23],MDC_regs[24],MDC_regs[25],MDC_regs[26]);
@@ -1170,7 +1264,7 @@ void RS485_M_Read_Batt(uint8_t slaveID, uint16_t Start_Add, uint16_t NbRgt ,uint
 				//wrong CRC
 			}
 		}
-		SCI1_rxdone =0;
+		SCI1_rxdone = 0;
 	}
 }
 
@@ -1191,14 +1285,13 @@ void RS485_M_Cmd04_and_Receive(uint8_t slaveID, uint32_t StartAdd, uint16_t NoR,
 	*(request+6) = CRC16 & 0xff;
 	*(request+7) = CRC16 >> 8;
 
-	R_Config_SCI1_Serial_Receive((uint8_t*)&rx1_buff, (NoR*2+5));
-
 	RS485_M_Ctr = 1U; //RS485 send mode
 	R_SCI1_AsyncTransmit(request,8);
 	RS485_M_Ctr = 0U; //RS485 receive mode
-	uint32_t lasttick = tick;
+	R_Config_SCI1_Serial_Receive((uint8_t*)&rx1_buff, (NoR*2+5));
 
-	while((!SCI1_rxdone) && (tick-lasttick<NoR*10));
+//	while((!SCI1_rxdone) && (tick-lasttick<NoR*10));
+	while((!SCI1_rxdone) && (!R_BSP_SoftwareDelay(200, BSP_DELAY_MILLISECS)));
 	if (SCI1_rxdone ==1)
 	{
 		//print test
@@ -1265,10 +1358,10 @@ void RS485_Master_Mode()
 			RS485_M_Read_and_Receive(ID_Box_Huawei, 0x1101, Rs485_RequestToSlave, &MDC_regs[17]);
 			RS485_M_Read_and_Receive(ID_Box_Huawei, 0x1100, Rs485_RequestToSlave, &MDC_regs[18]);
 			//Battery 1 2 Parameters
-			RS485_M_Read_Batt(ID_Box_Huawei, 0xA731, 125 ,Rs485_RequestToSlave, BattRegs); //Battery 1 2 Regs 0xA731
+			RS485_M_Read_Batt(ID_Box_Huawei, 0xA731, 125, Rs485_RequestToSlave, BattRegs); //Battery 1 2 Regs 0xA731
 			//Battery 3 4 Parameters
-			RS485_M_Read_Batt(ID_Box_Huawei, 0xA7B1, 125 ,Rs485_RequestToSlave, BattRegs); //Battery 3 4 Regs 0xA7B1
-			RS485_M_Read_Batt(ID_Box_Huawei, 0x1000, 22 ,Rs485_RequestToSlave, BattRegs5);
+			RS485_M_Read_Batt(ID_Box_Huawei, 0xA7B1, 125, Rs485_RequestToSlave, BattRegs); //Battery 3 4 Regs 0xA7B1
+			RS485_M_Read_Batt(ID_Box_Huawei, 0x1000, 22, Rs485_RequestToSlave, BattRegs5);
 			RS485_M_Read_Batt(ID_Box_Huawei, 0xA731, 181, Rs485_RequestToSlave, MDC_regs + 130);
 			break;
 		case 2:
@@ -1319,8 +1412,14 @@ void RS485_Master_Mode()
 			break;
 		case 7:
 			// accu ztt4850
-			RS485_M_Read_and_Receive(ID_ZZT4850, 0, Rs485_RequestToSlave, &MDC_regs[0]);
-			RS485_M_Read_and_Receive(ID_ZZT4850, 1, Rs485_RequestToSlave, &MDC_regs[5]);
+/*			RS485_M_Read_and_Receive(ID_ZZT4850, 0, Rs485_RequestToSlave, &MDC_regs[0]);
+			RS485_M_Read_and_Receive(ID_ZZT4850, 1, Rs485_RequestToSlave, &MDC_regs[5]);*/
+			RS485_M_Read_and_Receive(ID_ZZT4850, 0, Rs485_RequestToSlave, &MDC_regs[5]);
+			RS485_M_Read_and_Receive(ID_ZZT4850, 1, Rs485_RequestToSlave, &MDC_regs[0]);
+			RS485_M_Read_and_Receive(ID_ZZT4850, 2, Rs485_RequestToSlave, &MDC_regs[23]);
+			RS485_M_Read_and_Receive(ID_ZZT4850, 3, Rs485_RequestToSlave, &MDC_regs[24]);
+			RS485_M_Read_and_Receive(ID_ZZT4850, 31, Rs485_RequestToSlave, &MDC_regs[26]);
+			RS485_M_Read_and_Receive(ID_ZZT4850, 5, Rs485_RequestToSlave, &MDC_regs[50]);
 			break;
 		case 8:
 			// accu vision 100A_VN
@@ -1332,6 +1431,8 @@ void RS485_Master_Mode()
 		case 10:
 			//tủ nguồn POSTEF CSU501B (SNMP)
 			handler_snmp();
+			break;
+		default:
 			break;
 	}
 }
@@ -1349,24 +1450,16 @@ void measure()
 		MDC_regs[3] = (uint16_t) (volt_measure(ADC_Volt4, 4));
 
 		MDC_regs[5] = (uint16_t) abs((current_measure(ADC_Curr1, ADC_CurrRef1, 1)));
-		if (MDC_regs[5] < 100)
-			MDC_regs[5] = 0;
-
+		if (MDC_regs[5] < 100) MDC_regs[5] = 0;
 		MDC_regs[6] = (uint16_t) abs((current_measure(ADC_Curr2, ADC_CurrRef2, 2)));
-		if (MDC_regs[6] < 100)
-			MDC_regs[6] = 0;
-
+		if (MDC_regs[6] < 100) MDC_regs[6] = 0;
 		MDC_regs[7] = (uint16_t) abs((current_measure(ADC_Curr3, ADC_CurrRef3, 3)));
-		if (MDC_regs[7] < 100)
-			MDC_regs[7] = 0;
-
+		if (MDC_regs[7] < 100) MDC_regs[7] = 0;
 		MDC_regs[8] = (uint16_t) abs((current_measure(ADC_Curr4, ADC_CurrRef4, 4)));
-		if (MDC_regs[8] < 100)
-			MDC_regs[8] = 0;
+		if (MDC_regs[8] < 100) MDC_regs[8] = 0;
 
 		MDC_regs[10] = (uint16_t)temp_measure(ADC_Temp1,1);
 		MDC_regs[11] = (uint16_t)temp_measure(ADC_Temp2,2);
-
 		MDC_regs[12] = (MDC_regs[0]/100)*(MDC_regs[5]/100);
 		MDC_regs[13] = (MDC_regs[1]/100)*(MDC_regs[6]/100);
 		MDC_regs[14] = (MDC_regs[2]/100)*(MDC_regs[7]/100);
@@ -1382,7 +1475,6 @@ void measure()
 //		sprintf(print_str,"\n Curr1: %d Curr2: %d Curr3: %d Curr4: %d\n", MDC_regs[5],MDC_regs[6],MDC_regs[7],MDC_regs[8]);
 //		R_SCI1_AsyncTransmit((uint8_t*)print_str,strlen(print_str));
 //		RS485_M_Ctr = 0U; //RS485 Master receive mode
-
 //		RS485_S_Ctr = 1U; //RS485 Master send mode
 //		R_SCI5_AsyncTransmit((uint8_t*)print_str,strlen(print_str),transmit_ctrl);
 //		RS485_S_Ctr = 0U; //RS485 Master send mode

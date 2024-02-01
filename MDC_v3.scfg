@@ -286,10 +286,10 @@
         <Item currentVect="215" id="SCI0_RXI0" priority="15" usedState="Not Use"/>
         <Item currentVect="216" id="SCI0_TXI0" priority="15" usedState="Not Use"/>
         <Item currentVect="217" id="SCI0_TEI0" priority="15" usedState="Not Use"/>
-        <Item currentVect="218" id="SCI1_ERI1" priority="14" usedState="Used"/>
-        <Item currentVect="219" id="SCI1_RXI1" priority="14" usedState="Used"/>
-        <Item currentVect="220" id="SCI1_TXI1" priority="14" usedState="Used"/>
-        <Item currentVect="221" id="SCI1_TEI1" priority="14" usedState="Used"/>
+        <Item currentVect="218" id="SCI1_ERI1" priority="15" usedState="Used"/>
+        <Item currentVect="219" id="SCI1_RXI1" priority="15" usedState="Used"/>
+        <Item currentVect="220" id="SCI1_TXI1" priority="15" usedState="Used"/>
+        <Item currentVect="221" id="SCI1_TEI1" priority="15" usedState="Used"/>
         <Item currentVect="222" id="SCI5_ERI5" priority="15" usedState="Used"/>
         <Item currentVect="223" id="SCI5_RXI5" priority="15" usedState="Used"/>
         <Item currentVect="224" id="SCI5_TXI5" priority="15" usedState="Used"/>
@@ -835,7 +835,7 @@
                     <item id="Enable" input="" vlaue="0"/>
                     <item id="Disable" input="" vlaue="0"/>
                 </option>
-                <option enabled="true" id="ERIPriority" selection="Level14">
+                <option enabled="true" id="ERIPriority" selection="Level15">
                     <item id="Level0" input="" vlaue="0"/>
                     <item id="Level1" input="" vlaue="0"/>
                     <item id="Level2" input="" vlaue="0"/>
@@ -2706,6 +2706,9 @@
                 <gridItem id="FLASH_CFG_CODE_FLASH_BGO" selectedIndex="0"/>
                 <gridItem id="FLASH_CFG_CODE_FLASH_RUN_FROM_ROM" selectedIndex="0"/>
             </component>
+            <source description="Components supporting Firmware Integration Technology" display="Firmware Integration Technology" id="com.renesas.smc.tools.swcomponent.fit.source"/>
+            <source description="Components supporting Firmware Integration Technology" display="Firmware Integration Technology" id="com.renesas.smc.tools.swcomponent.fit.source"/>
+            <source description="Components supporting Firmware Integration Technology" display="Firmware Integration Technology" id="com.renesas.smc.tools.swcomponent.fit.source"/>
             <source description="Components supporting Firmware Integration Technology" display="Firmware Integration Technology" id="com.renesas.smc.tools.swcomponent.fit.source"/>
             <source description="Components supporting Firmware Integration Technology" display="Firmware Integration Technology" id="com.renesas.smc.tools.swcomponent.fit.source"/>
             <source description="Components supporting Firmware Integration Technology" display="Firmware Integration Technology" id="com.renesas.smc.tools.swcomponent.fit.source"/>

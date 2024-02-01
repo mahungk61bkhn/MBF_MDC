@@ -53,6 +53,7 @@ extern volatile uint16_t  g_sci1_rx_length;                  /* SCI1 receive dat
 volatile uint8_t SCI1_rxdone;
 /* Flag used to detect completion of transmission */
 static volatile uint8_t SCI1_txdone;
+//extern uint16_t rx1_count;
 MD_STATUS R_SCI1_AsyncTransmit (uint8_t * const tx_buf,uint16_t tx_num);
 /* End user code. Do not edit comment generated here */
 
@@ -227,19 +228,17 @@ static void r_Config_SCI1_callback_receiveerror(void)
 * Return Value : status -
 * MD_OK or MD_ARGERROR
 *******************************************************************************/
-MD_STATUS R_SCI1_AsyncTransmit (uint8_t * const tx_buf,uint16_t tx_num)
-{
-	 MD_STATUS status = MD_OK;
-	 /* Clear transmit completion flag before transmission */
-	 SCI1_txdone = 0U;
-	 /* Set SCI5 transmit buffer address and start transmission */
-	 status = R_Config_SCI1_Serial_Send(tx_buf, tx_num);
-	 /* Wait for transmit end flag */
-	 while (0U == SCI1_txdone)
-	 {
-		 /* Wait */
-	 }
-	 return (status);
+MD_STATUS R_SCI1_AsyncTransmit(uint8_t *const tx_buf, uint16_t tx_num) {
+	MD_STATUS status = MD_OK;
+	/* Clear transmit completion flag before transmission */
+	SCI1_txdone = 0U;
+	/* Set SCI5 transmit buffer address and start transmission */
+	status = R_Config_SCI1_Serial_Send(tx_buf, tx_num);
+	/* Wait for transmit end flag */
+	while (0U == SCI1_txdone) {
+		/* Wait */
+	}
+	return (status);
 }
 /*******************************************************************************
 * End of function R_SCI8_AsyncTransmit

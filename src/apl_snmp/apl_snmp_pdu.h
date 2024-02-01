@@ -54,7 +54,7 @@ typedef struct{
 
     uint8_t             ver_data_type;
     uint8_t             length_of_version;
-    uint8_t             snmp_version;         //0-snmpv1; 1- snmp v2
+    uint8_t             snmp_version;         //0-snmpv1; 1-snmp v2
 
     uint8_t             community_data_type;
     uint8_t             length_of_community;
@@ -77,16 +77,18 @@ typedef struct{
 
     uint8_t             start_var_sequence;
     uint8_t             length_of_start_var_sequence;
-
     uint8_t             start_first_var;
+
     uint8_t             length_of_first_var;
     uint8_t             oid_data_type;
     uint8_t             leng_of_oid;
     uint8_t             oid_value[30];
+
     //uint8_t             end_of_oid_value;
     uint8_t             end_of_var;
 
     uint8_t             end_of_mess_header;
+
     uint8_t             value_set[50];
     uint8_t             type_value_set;
     uint8_t             value_set_length;
@@ -96,7 +98,6 @@ typedef struct{
     PDU_SNMP_REQ_T pdu_req;
     uint8_t        data_req[256];
     uint8_t        index_data_req;
-
 }SNMP_MANAGER_T;
 extern  SNMP_MANAGER_T snmp_manager_t;
 

@@ -63,7 +63,7 @@ void R_Config_SCI1_Create(void)
     MSTP(SCI1) = 0U;
 
     /* Set interrupt priority */
-    IPR(SCI1, TXI1) = _0E_SCI_PRIORITY_LEVEL14;
+    IPR(SCI1, TXI1) = _0F_SCI_PRIORITY_LEVEL15;
 
     /* Clear the control register */
     SCI1.SCR.BYTE = 0x00U;
