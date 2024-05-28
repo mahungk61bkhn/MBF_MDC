@@ -1,7 +1,7 @@
 /***********************************************************************
 *
 *  FILE        : MDC.c
-*  DATE        : 2023-02-22
+*  DATE        : 2024-05-28
 *  DESCRIPTION : Main Program
 *
 *  NOTE:THIS IS A TYPICAL EXAMPLE.
